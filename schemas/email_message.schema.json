@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://limebh.local/schemas/email_message-1.0.json",
+  "title": "LIMEBH Email Message",
+  "type": "object",
+  "required": ["schema_version", "record_type", "record_id", "source", "data", "processing"],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "record_type": { "const": "email_message" },
+    "record_id": { "type": "string", "minLength": 1 },
+    "source": {
+      "type": "object",
+      "required": ["file_name", "file_type", "size_bytes"],
+      "properties": {
+        "file_name": { "type": "string" },
+        "file_type": { "const": "mbox" },
+        "size_bytes": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "data": {
+      "type": "object",
+      "required": [
+        "message_id", "thread_id", "gmail_labels", "date", "from", "to", "cc", "bcc",
+        "reply_to", "in_reply_to", "references", "subject", "body_text", "attachments"
+      ],
+      "properties": {
+        "message_id": { "type": "string" },
+        "thread_id": { "type": ["string", "null"] },
+        "gmail_labels": { "type": "array", "items": { "type": "string" } },
+        "date": { "type": ["string", "null"] },
+        "date_raw": { "type": ["string", "null"] },
+        "from": { "$ref": "#/$defs/addressList" },
+        "to": { "$ref": "#/$defs/addressList" },
+        "cc": { "$ref": "#/$defs/addressList" },
+        "bcc": { "$ref": "#/$defs/addressList" },
+        "reply_to": { "$ref": "#/$defs/addressList" },
+        "in_reply_to": { "type": ["string", "null"] },
+        "references": { "type": "array", "items": { "type": "string" } },
+        "subject": { "type": ["string", "null"] },
+        "body_text": { "type": "string" },
+        "body_html": { "type": ["string", "null"] },
+        "attachments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["file_name", "media_type", "size_bytes", "content_extracted"],
+            "properties": {
+              "file_name": { "type": ["string", "null"] },
+              "media_type": { "type": "string" },
+              "size_bytes": { "type": ["integer", "null"] },
+              "content_extracted": { "type": "boolean" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "processing": {
+      "type": "object",
+      "required": ["converted_at", "unicode_cleaned", "warnings"],
+      "properties": {
+        "converted_at": { "type": "string" },
+        "unicode_cleaned": { "type": "boolean" },
+        "warnings": { "type": "array", "items": { "type": "string" } }
+        ,"segment_number": { "type": "integer", "minimum": 1 }
+        ,"segment_count": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "addressList": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "email"],
+        "properties": {
+          "name": { "type": "string" },
+          "email": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

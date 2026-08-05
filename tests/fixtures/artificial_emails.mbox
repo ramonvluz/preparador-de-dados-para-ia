@@ -1,0 +1,56 @@
+From membro1@example.invalid Tue Aug  4 12:00:00 2026
+Message-ID: <mensagem-1@example.invalid>
+Date: Tue, 04 Aug 2026 12:00:00 -0300
+From: Pessoa Exemplo <membro1@example.invalid>
+To: Liga Exemplo <liga@example.invalid>
+Cc: Conselho <conselho@example.invalid>
+Reply-To: Respostas <respostas@example.invalid>
+Subject: Primeiro assunto artificial
+X-GM-THRID: 1234567890001
+X-Gmail-Labels: Caixa de entrada,Importante
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+
+Ol=C3=A1=C2=A0Liga=E2=80=8B.
+Esta mensagem =C3=A9 totalmente artificial.
+
+From membro2@example.invalid Tue Aug  4 13:00:00 2026
+Message-ID: <mensagem-2@example.invalid>
+Date: Tue, 04 Aug 2026 13:00:00 -0300
+From: Outra Pessoa <membro2@example.invalid>
+To: Liga Exemplo <liga@example.invalid>
+Subject: Resposta artificial com anexo
+X-GM-THRID: 1234567890001
+X-Gmail-Labels: Enviados,"Projeto, IA"
+In-Reply-To: <mensagem-1@example.invalid>
+References: <inicio@example.invalid> <mensagem-1@example.invalid>
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="MIXED-ARTIFICIAL"
+
+--MIXED-ARTIFICIAL
+Content-Type: multipart/alternative; boundary="ALT-ARTIFICIAL"
+
+--ALT-ARTIFICIAL
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+
+Corpo textual da resposta artificial.
+
+--ALT-ARTIFICIAL
+Content-Type: text/html; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+
+<p>Corpo <strong>HTML</strong> artificial.</p>
+
+--ALT-ARTIFICIAL--
+
+--MIXED-ARTIFICIAL
+Content-Type: application/pdf
+Content-Disposition: attachment; filename="ata-artificial.pdf"
+Content-Transfer-Encoding: base64
+
+Y29udGV1ZG8gYXJ0aWZpY2lhbA==
+
+--MIXED-ARTIFICIAL--
+

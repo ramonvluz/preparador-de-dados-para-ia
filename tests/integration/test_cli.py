@@ -1,0 +1,16 @@
+from pathlib import Path
+
+from limebh_preparador.cli import main
+
+PROJECT_ROOT = Path(__file__).parents[2]
+FIXTURE = PROJECT_ROOT / "tests" / "fixtures" / "artificial_emails.mbox"
+
+
+def test_cli_is_a_client_of_the_core(tmp_path: Path, capsys: object) -> None:
+    output = tmp_path / "cli"
+    exit_code = main([str(FIXTURE), "--output", str(output), "--profile", "api"])
+
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert "2/2 mensagens" in captured.out
+    assert list((output / "PRONTO_PARA_IA").glob("*.jsonl"))
