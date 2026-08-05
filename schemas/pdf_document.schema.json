@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://limebh.local/schemas/pdf_document-1.0.json",
+  "title": "LIMEBH PDF Document",
+  "type": "object",
+  "required": ["schema_version", "record_type", "record_id", "source", "data", "processing"],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "record_type": { "const": "pdf_document" },
+    "record_id": { "type": "string", "pattern": "^pdf_[a-f0-9]{24}$" },
+    "source": {
+      "type": "object",
+      "required": ["file_name", "file_type", "size_bytes"],
+      "properties": {
+        "file_name": { "type": "string", "minLength": 1 },
+        "file_type": { "const": "pdf" },
+        "size_bytes": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "data": {
+      "type": "object",
+      "required": [
+        "title",
+        "author",
+        "page_count",
+        "pages",
+        "outline",
+        "embedded_files",
+        "images"
+      ],
+      "properties": {
+        "title": { "type": ["string", "null"] },
+        "author": { "type": ["string", "null"] },
+        "page_count": { "type": "integer", "minimum": 0 },
+        "pages": { "type": "array", "items": { "$ref": "#/$defs/page" } },
+        "outline": { "type": "array", "items": { "$ref": "#/$defs/outlineItem" } },
+        "embedded_files": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/embeddedFile" }
+        },
+        "images": { "type": "array", "items": { "$ref": "#/$defs/image" } }
+      },
+      "additionalProperties": false
+    },
+    "processing": {
+      "type": "object",
+      "required": ["converted_at", "unicode_cleaned", "warnings", "ocr_applied"],
+      "properties": {
+        "converted_at": { "type": "string", "format": "date-time" },
+        "unicode_cleaned": { "type": "boolean" },
+        "warnings": { "type": "array", "items": { "type": "string" } },
+        "ocr_applied": { "type": "boolean" },
+        "segment_number": { "type": "integer", "minimum": 1 },
+        "segment_count": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "page": {
+      "type": "object",
+      "required": ["page_number", "text", "extraction_method"],
+      "properties": {
+        "page_number": { "type": "integer", "minimum": 1 },
+        "text": { "type": "string" },
+        "extraction_method": { "enum": ["native", "ocr", "none"] }
+      },
+      "additionalProperties": false
+    },
+    "outlineItem": {
+      "type": "object",
+      "required": ["title", "page_number", "children"],
+      "properties": {
+        "title": { "type": "string" },
+        "page_number": {
+          "anyOf": [
+            { "type": "integer", "minimum": 1 },
+            { "type": "null" }
+          ]
+        },
+        "children": { "type": "array", "items": { "$ref": "#/$defs/outlineItem" } }
+      },
+      "additionalProperties": false
+    },
+    "embeddedFile": {
+      "type": "object",
+      "required": ["file_name", "media_type", "size_bytes"],
+      "properties": {
+        "file_name": { "type": "string" },
+        "media_type": { "type": ["string", "null"] },
+        "size_bytes": { "type": ["integer", "null"], "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "image": {
+      "type": "object",
+      "required": ["page_number", "image_number", "media_type", "width", "height"],
+      "properties": {
+        "page_number": { "type": "integer", "minimum": 1 },
+        "image_number": { "type": "integer", "minimum": 1 },
+        "media_type": { "type": ["string", "null"] },
+        "width": { "type": ["integer", "null"], "minimum": 1 },
+        "height": { "type": ["integer", "null"], "minimum": 1 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

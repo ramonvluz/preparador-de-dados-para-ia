@@ -3,7 +3,8 @@ from __future__ import annotations
 import hashlib
 from datetime import UTC, datetime
 
-SCHEMA_VERSION = "1.0"
+from limebh_preparador.contracts.common import SCHEMA_VERSION
+
 RECORD_TYPE = "email_message"
 
 

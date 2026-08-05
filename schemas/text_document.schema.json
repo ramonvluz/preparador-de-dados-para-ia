@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://limebh.local/schemas/text_document-1.0.json",
+  "title": "LIMEBH Text Document",
+  "type": "object",
+  "required": ["schema_version", "record_type", "record_id", "source", "data", "processing"],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "record_type": { "const": "text_document" },
+    "record_id": { "type": "string", "pattern": "^text_[a-f0-9]{24}$" },
+    "source": {
+      "type": "object",
+      "required": ["file_name", "file_type", "size_bytes"],
+      "properties": {
+        "file_name": { "type": "string", "minLength": 1 },
+        "file_type": { "enum": ["txt", "markdown"] },
+        "size_bytes": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "data": {
+      "type": "object",
+      "required": ["title", "encoding", "content_format", "content", "headings", "sections"],
+      "properties": {
+        "title": { "type": ["string", "null"] },
+        "encoding": { "type": "string", "minLength": 1 },
+        "content_format": { "enum": ["plain_text", "markdown"] },
+        "content": { "type": "string" },
+        "headings": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/heading" }
+        },
+        "sections": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/section" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "processing": { "$ref": "#/$defs/processing" }
+  },
+  "$defs": {
+    "heading": {
+      "type": "object",
+      "required": ["level", "text", "line_number"],
+      "properties": {
+        "level": { "type": "integer", "minimum": 1 },
+        "text": { "type": "string" },
+        "line_number": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "section": {
+      "type": "object",
+      "required": ["title", "level", "content", "start_line", "end_line"],
+      "properties": {
+        "title": { "type": ["string", "null"] },
+        "level": {
+          "anyOf": [
+            { "type": "integer", "minimum": 1 },
+            { "type": "null" }
+          ]
+        },
+        "content": { "type": "string" },
+        "start_line": { "type": "integer", "minimum": 1 },
+        "end_line": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "processing": {
+      "type": "object",
+      "required": ["converted_at", "unicode_cleaned", "warnings"],
+      "properties": {
+        "converted_at": { "type": "string", "format": "date-time" },
+        "unicode_cleaned": { "type": "boolean" },
+        "warnings": { "type": "array", "items": { "type": "string" } },
+        "segment_number": { "type": "integer", "minimum": 1 },
+        "segment_count": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

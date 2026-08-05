@@ -4,9 +4,13 @@ Aplicação local para converter, limpar, estruturar e particionar arquivos
 administrativos antes do uso em plataformas de IA ou integrações via API.
 
 Este repositório contém a nova base modular do produto. A base atual implementa
-a conversão incremental de MBOX, o contrato versionado
-`email_message`, limpeza Unicode auditável, particionamento por bytes e tokens,
-saídas JSON/JSONL, relatório, cancelamento seguro, CLI e interface desktop.
+a conversão incremental de MBOX, o contrato versionado `email_message`, limpeza
+Unicode auditável, particionamento por bytes e tokens, saídas JSON/JSONL,
+relatório, cancelamento seguro, CLI e interface desktop.
+
+A fundação da Fase 3 também está pronta: contratos versionados para TXT/Markdown,
+PDF e DOCX, uma interface comum de conversores e um registro extensível por
+extensão. A extração desses formatos será incorporada nos próximos incrementos.
 
 ## Princípios de segurança
 
@@ -75,3 +79,4 @@ fixtures em `tests/fixtures` são artificiais e usam domínios reservados.
 - [PRD](docs/PRD.md)
 - [Validação de equivalência](docs/VALIDACAO_EQUIVALENCIA.md)
 - [Validação da Fase 2 — MVP desktop](docs/VALIDACAO_FASE_2.md)
+- [Validação da Fase 3A — contratos e arquitetura](docs/VALIDACAO_FASE_3A.md)
