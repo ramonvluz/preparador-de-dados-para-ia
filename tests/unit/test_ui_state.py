@@ -1,0 +1,63 @@
+from pathlib import Path
+
+import pytest
+
+from limebh_preparador.application.conversion import DestinationProfile
+from limebh_preparador.ui.state import (
+    DesktopConversionRequest,
+    UiProfile,
+    human_duration,
+    human_file_size,
+    recommendation_for,
+)
+
+
+def test_profile_recommendations_map_to_core_profiles() -> None:
+    platform = recommendation_for(UiProfile.PLATFORM)
+    api = recommendation_for(UiProfile.API)
+
+    assert platform.format_name == "JSON particionado"
+    assert api.format_name == "JSONL particionado"
+    assert UiProfile.PLATFORM.destination_profile is DestinationProfile.PLATFORM
+    assert UiProfile.API.destination_profile is DestinationProfile.API
+
+
+def test_desktop_request_validates_source_and_builds_settings(tmp_path: Path) -> None:
+    source = tmp_path / "artificial.mbox"
+    source.write_text("From artificial@example.invalid\n", encoding="utf-8")
+    request = DesktopConversionRequest(
+        source=source,
+        output_root=tmp_path / "saida",
+        profile=UiProfile.API,
+        include_html=True,
+    )
+
+    request.validate()
+    assert request.settings.profile is DestinationProfile.API
+    assert request.settings.include_html is True
+
+
+def test_desktop_request_rejects_unsupported_extension(tmp_path: Path) -> None:
+    source = tmp_path / "artificial.txt"
+    source.write_text("artificial", encoding="utf-8")
+    request = DesktopConversionRequest(source=source, output_root=tmp_path)
+
+    with pytest.raises(ValueError, match="extensão .mbox"):
+        request.validate()
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        (512, "512 bytes"),
+        (1536, "1.50 KB"),
+        (2 * 1024 * 1024, "2.00 MB"),
+    ],
+)
+def test_human_file_size(value: int, expected: str) -> None:
+    assert human_file_size(value) == expected
+
+
+def test_human_duration() -> None:
+    assert human_duration(12.2) == "12 s"
+    assert human_duration(323.9) == "5 min 24 s"

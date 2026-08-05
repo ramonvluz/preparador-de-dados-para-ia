@@ -22,6 +22,7 @@ dev = [
 
 [project.scripts]
 limebh-preparador = "limebh_preparador.cli:main"
+limebh-preparador-gui = "limebh_preparador.ui.app:main"
 
 [tool.setuptools]
 package-dir = { "" = "src" }

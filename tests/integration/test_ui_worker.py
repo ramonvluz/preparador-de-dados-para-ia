@@ -1,0 +1,47 @@
+from pathlib import Path
+from queue import Empty
+
+from limebh_preparador.ui.state import DesktopConversionRequest, UiProfile
+from limebh_preparador.ui.worker import (
+    ConversionWorker,
+    WorkerEvent,
+    WorkerFinished,
+    WorkerProgress,
+    WorkerStarted,
+)
+
+PROJECT_ROOT = Path(__file__).parents[2]
+FIXTURE = PROJECT_ROOT / "tests" / "fixtures" / "artificial_emails.mbox"
+
+
+def _drain_events(worker: ConversionWorker) -> list[WorkerEvent]:
+    events: list[WorkerEvent] = []
+    while True:
+        try:
+            events.append(worker.events.get_nowait())
+        except Empty:
+            return events
+
+
+def test_worker_runs_core_outside_calling_thread(tmp_path: Path) -> None:
+    worker = ConversionWorker()
+    request = DesktopConversionRequest(
+        source=FIXTURE,
+        output_root=tmp_path,
+        profile=UiProfile.PLATFORM,
+    )
+
+    worker.start(request)
+    worker.wait(timeout=10)
+    events = _drain_events(worker)
+
+    assert worker.is_active is False
+    started = next(event for event in events if isinstance(event, WorkerStarted))
+    finished = next(event for event in events if isinstance(event, WorkerFinished))
+    progress_events = [event for event in events if isinstance(event, WorkerProgress)]
+    assert finished.output_dir == started.output_dir
+    assert finished.report["converted_messages"] == 2
+    assert finished.report["failed_messages"] == 0
+    assert progress_events
+    assert (finished.output_dir / "PRONTO_PARA_IA").is_dir()
+    assert (finished.output_dir / "relatorio_conversao.json").is_file()

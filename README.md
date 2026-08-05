@@ -3,10 +3,10 @@
 Aplicação local para converter, limpar, estruturar e particionar arquivos
 administrativos antes do uso em plataformas de IA ou integrações via API.
 
-Este repositório contém a nova base modular do produto. O primeiro incremento
-implementa a conversão incremental de MBOX, o contrato versionado
+Este repositório contém a nova base modular do produto. A base atual implementa
+a conversão incremental de MBOX, o contrato versionado
 `email_message`, limpeza Unicode auditável, particionamento por bytes e tokens,
-saídas JSON/JSONL, relatório, cancelamento seguro e uma CLI cliente do núcleo.
+saídas JSON/JSONL, relatório, cancelamento seguro, CLI e interface desktop.
 
 ## Princípios de segurança
 
@@ -43,6 +43,24 @@ o perfil `api` gera JSONL particionado.
 Use `--help` para consultar todas as opções. Limites são configuráveis e não
 representam garantias permanentes de plataformas externas.
 
+## Interface desktop
+
+Inicie a aplicação gráfica pelo executável instalado no ambiente virtual:
+
+```powershell
+.\.venv\Scripts\limebh-preparador-gui.exe
+```
+
+Também é possível executar diretamente como módulo:
+
+```powershell
+.\.venv\Scripts\python.exe -m limebh_preparador.ui
+```
+
+A interface seleciona um MBOX, recomenda JSON ou JSONL conforme o perfil,
+utiliza `Downloads\Preparador LIMEBH` por padrão e executa a conversão em uma
+thread separada. O cancelamento preserva partes concluídas e válidas.
+
 ## Verificação
 
 ```powershell
@@ -56,3 +74,4 @@ fixtures em `tests/fixtures` são artificiais e usam domínios reservados.
 
 - [PRD](docs/PRD.md)
 - [Validação de equivalência](docs/VALIDACAO_EQUIVALENCIA.md)
+- [Validação da Fase 2 — MVP desktop](docs/VALIDACAO_FASE_2.md)

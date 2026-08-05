@@ -1,1 +1,1 @@
-"""Ponto de extensão da futura interface Tkinter/ttk."""
+"""Interface desktop Tkinter/ttk do Preparador LIMEBH."""
