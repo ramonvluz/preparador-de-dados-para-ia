@@ -17,6 +17,10 @@ infere de forma conservadora títulos em negrito e cabeçalhos prováveis de tab
 Sequências de caracteres suspeitas geram aviso, mas nunca são corrigidas
 automaticamente.
 
+A Fase 4A estabelece contratos versionados para CSV e XLSX, com colunas tipadas,
+segmentos de linhas, contexto de abas e intervalos e preservação auditável de
+fórmulas. Os conversores tabulares serão adicionados nos incrementos seguintes.
+
 ## Princípios de segurança
 
 - O processamento é local e não envia dados para a internet.
@@ -96,3 +100,4 @@ fixtures em `tests/fixtures` são artificiais e usam domínios reservados.
 - [Validação da Fase 3B — TXT e Markdown](docs/VALIDACAO_FASE_3B.md)
 - [Validação da Fase 3C — PDF](docs/VALIDACAO_FASE_3C.md)
 - [Validação da Fase 3D — DOCX](docs/VALIDACAO_FASE_3D.md)
+- [Validação da Fase 4A — contratos e arquitetura tabular](docs/VALIDACAO_FASE_4A.md)
