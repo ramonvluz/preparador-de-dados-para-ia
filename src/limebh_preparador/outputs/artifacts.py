@@ -172,6 +172,9 @@ def write_word_readme(
     image_count: int,
     headers_footers_omitted: bool,
     features_omitted: list[str],
+    suspicious_text_sequences: int,
+    inferred_headings: int,
+    inferred_table_headers: int,
     cancelled: bool,
 ) -> Path:
     status_line = (
@@ -196,6 +199,8 @@ def write_word_readme(
         f"Blocos estruturais: {block_count}",
         f"Seções detectadas: {section_count}",
         f"Tabelas preservadas: {table_count}",
+        f"Títulos inferidos por formatação: {inferred_headings}",
+        f"Cabeçalhos de tabela inferidos: {inferred_table_headers}",
         f"Partes geradas: {part_count}",
         "Formato: MARKDOWN",
         "",
@@ -209,6 +214,19 @@ def write_word_readme(
         "O QUE NÃO ESTÁ INCLUÍDO",
         f"Recursos omitidos: {omitted_line}.",
         "Macros, objetos incorporados e reconstrução visual avançada não são processados.",
+        "",
+        "QUALIDADE DO TEXTO",
+        (
+            f"ATENÇÃO: foram detectadas {suspicious_text_sequences} sequência(s) de "
+            "caracteres suspeita(s) no documento de origem."
+            if suspicious_text_sequences
+            else "Nenhuma sequência de caracteres suspeita foi detectada."
+        ),
+        (
+            "O texto foi preservado sem correção automática. Revise o documento de origem."
+            if suspicious_text_sequences
+            else ""
+        ),
         "",
         "PRIVACIDADE",
         (

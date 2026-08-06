@@ -970,16 +970,20 @@ class PreparadorApp:
         part_count = len(parts) if isinstance(parts, list) else 0
         duration = human_duration(float(report.get("duration_seconds", 0.0)))
         result = str(report.get("result", ""))
+        warnings_count = int(report.get("warnings_count", 0) or 0)
         if result == "cancelled":
             self.status_var.set("Conversão cancelada com segurança")
-        elif failed:
+        elif failed or result == "success_with_warnings":
             self.status_var.set("Conversão concluída com avisos")
         else:
             self.status_var.set("Conversão concluída")
         self.counter_var.set(self._processed_count(converted))
         unit = str(report.get("unit_label", "registro"))
         units = unit if converted == 1 else ("mensagens" if unit == "mensagem" else f"{unit}s")
-        summary = f"{converted:,} {units} • {part_count} parte(s) • {failed} falha(s) • {duration}"
+        summary = (
+            f"{converted:,} {units} • {part_count} parte(s) • "
+            f"{warnings_count} aviso(s) • {failed} falha(s) • {duration}"
+        )
         self.summary_var.set(summary.replace(",", "."))
         self._set_busy(False)
         self.open_output_button.state(["!disabled"])

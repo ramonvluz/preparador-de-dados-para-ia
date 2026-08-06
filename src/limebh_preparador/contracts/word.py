@@ -22,13 +22,17 @@ class WordParagraph:
 class WordHeading:
     text: str
     level: int
+    inferred: bool = False
 
     def __post_init__(self) -> None:
         if self.level < 1:
             raise ValueError("O nível do título deve ser positivo")
 
     def as_dict(self) -> dict[str, object]:
-        return {"type": "heading", "text": self.text, "level": self.level}
+        result: dict[str, object] = {"type": "heading", "text": self.text, "level": self.level}
+        if self.inferred:
+            result["inferred"] = True
+        return result
 
 
 @dataclass(frozen=True, slots=True)
@@ -54,13 +58,17 @@ class WordListItem:
 class WordTable:
     rows: tuple[tuple[str, ...], ...]
     has_header: bool
+    header_inferred: bool = False
 
     def as_dict(self) -> dict[str, object]:
-        return {
+        result: dict[str, object] = {
             "type": "table",
             "rows": [list(row) for row in self.rows],
             "has_header": self.has_header,
         }
+        if self.header_inferred:
+            result["header_inferred"] = True
+        return result
 
 
 WordBlock = WordParagraph | WordHeading | WordListItem | WordTable
@@ -104,9 +112,14 @@ def build_word_document_record(
     images_omitted: int = 0,
     headers_footers_omitted: bool = False,
     features_omitted: Sequence[str] = (),
+    suspicious_text_sequences: int = 0,
+    inferred_headings: int = 0,
+    inferred_table_headers: int = 0,
 ) -> dict[str, object]:
     if images_omitted < 0:
         raise ValueError("A quantidade de imagens omitidas não pode ser negativa")
+    if min(suspicious_text_sequences, inferred_headings, inferred_table_headers) < 0:
+        raise ValueError("As métricas de qualidade do DOCX não podem ser negativas")
     data = {
         "title": title,
         "author": author,
@@ -127,5 +140,8 @@ def build_word_document_record(
             "images_omitted": images_omitted,
             "headers_footers_omitted": headers_footers_omitted,
             "features_omitted": list(features_omitted),
+            "suspicious_text_sequences": suspicious_text_sequences,
+            "inferred_headings": inferred_headings,
+            "inferred_table_headers": inferred_table_headers,
         },
     )

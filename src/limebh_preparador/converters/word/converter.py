@@ -5,7 +5,7 @@ from collections.abc import Iterator
 from docx import Document
 
 from limebh_preparador.application.progress import notify_progress
-from limebh_preparador.contracts.word import build_word_document_record
+from limebh_preparador.contracts.word import WordHeading, WordTable, build_word_document_record
 from limebh_preparador.converters.base import ConversionContext
 from limebh_preparador.converters.word.extractor import (
     document_author,
@@ -14,6 +14,7 @@ from limebh_preparador.converters.word.extractor import (
     extract_blocks,
     has_header_footer_content,
     omitted_features,
+    suspicious_text_sequence_count,
     validate_docx_archive,
 )
 from limebh_preparador.core.cleaning import UnicodeSanitizer
@@ -46,12 +47,21 @@ class WordDocumentConverter:
         images_omitted = embedded_image_count(document)
         headers_footers_omitted = has_header_footer_content(document)
         features_omitted = omitted_features(archive_names, document)
+        suspicious_sequences = suspicious_text_sequence_count(blocks)
+        inferred_headings = sum(
+            1 for block in blocks if isinstance(block, WordHeading) and block.inferred
+        )
+        inferred_table_headers = sum(
+            1 for block in blocks if isinstance(block, WordTable) and block.header_inferred
+        )
         warnings: list[str] = []
         if images_omitted:
             warnings.append(f"word_images_omitted:{images_omitted}")
         if headers_footers_omitted:
             warnings.append("word_headers_footers_omitted")
         warnings.extend(f"word_feature_omitted:{feature}" for feature in features_omitted)
+        if suspicious_sequences:
+            warnings.append(f"word_suspected_text_encoding_corruption:{suspicious_sequences}")
         if not blocks:
             warnings.append("word_document_without_extractable_blocks")
 
@@ -68,4 +78,7 @@ class WordDocumentConverter:
             images_omitted=images_omitted,
             headers_footers_omitted=headers_footers_omitted,
             features_omitted=features_omitted,
+            suspicious_text_sequences=suspicious_sequences,
+            inferred_headings=inferred_headings,
+            inferred_table_headers=inferred_table_headers,
         )

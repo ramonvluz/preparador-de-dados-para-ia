@@ -12,7 +12,10 @@ A Fase 3 converte TXT, Markdown, PDF e DOCX para partes Markdown
 autossuficientes. PDFs preservam referências explícitas de página e catalogam
 sumário, anexos e imagens sem copiar seus binários. DOCX preserva a ordem de
 títulos, parágrafos, listas, seções e tabelas simples, registrando os recursos
-avançados que não entram na saída.
+avançados que não entram na saída. Quando faltam estilos semânticos, o conversor
+infere de forma conservadora títulos em negrito e cabeçalhos prováveis de tabela.
+Sequências de caracteres suspeitas geram aviso, mas nunca são corrigidas
+automaticamente.
 
 ## Princípios de segurança
 

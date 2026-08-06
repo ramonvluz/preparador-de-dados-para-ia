@@ -93,10 +93,15 @@ def _word_units(record: dict[str, object]) -> list[_WordUnit]:
     if record.get("record_type") != "word_document":
         raise ValueError("O gravador Word recebeu um contrato incompatível")
     data = record.get("data")
-    if not isinstance(data, dict) or not isinstance(data.get("blocks"), list):
+    processing = record.get("processing")
+    if (
+        not isinstance(data, dict)
+        or not isinstance(data.get("blocks"), list)
+        or not isinstance(processing, dict)
+    ):
         raise TypeError("O contrato Word não contém blocos válidos")
 
-    units = [_WordUnit(kind="catalog", text=_catalog_markdown(data))]
+    units = [_WordUnit(kind="catalog", text=_catalog_markdown(data, processing))]
     list_lines: list[str] = []
     list_start: int | None = None
 
@@ -157,23 +162,39 @@ def _word_units(record: dict[str, object]) -> list[_WordUnit]:
     return units
 
 
-def _catalog_markdown(data: dict[str, object]) -> str:
+def _catalog_markdown(
+    data: dict[str, object],
+    processing: dict[str, object],
+) -> str:
     title = str(data.get("title") or "Documento Word")
     author = str(data.get("author") or "não informado")
     blocks = data.get("blocks")
     sections = data.get("sections")
     block_count = len(blocks) if isinstance(blocks, list) else 0
     section_count = len(sections) if isinstance(sections, list) else 0
-    return "\n".join(
-        [
-            "## Catálogo do documento Word",
-            "",
-            f"- Título: {title}",
-            f"- Autor: {author}",
-            f"- Blocos estruturais: {block_count}",
-            f"- Seções detectadas: {section_count}",
-        ]
-    )
+    lines = [
+        "## Catálogo do documento Word",
+        "",
+        f"- Título: {title}",
+        f"- Autor: {author}",
+        f"- Blocos estruturais: {block_count}",
+        f"- Seções detectadas: {section_count}",
+    ]
+    suspicious_sequences = int(processing.get("suspicious_text_sequences", 0) or 0)
+    if suspicious_sequences:
+        lines.extend(
+            [
+                "",
+                "### Aviso de qualidade do texto",
+                "",
+                (
+                    f"- Foram detectadas {suspicious_sequences} sequência(s) de caracteres "
+                    "suspeita(s) no documento de origem. O texto foi preservado sem "
+                    "reconstrução automática e deve ser revisado."
+                ),
+            ]
+        )
+    return "\n".join(lines)
 
 
 def _list_item_markdown(block: dict[str, object]) -> str:
@@ -378,6 +399,12 @@ def _render_part(
         ("images_omitted", processing.get("images_omitted", 0)),
         ("headers_footers_omitted", processing.get("headers_footers_omitted", False)),
         ("features_omitted", processing.get("features_omitted", [])),
+        (
+            "suspicious_text_sequences",
+            processing.get("suspicious_text_sequences", 0),
+        ),
+        ("inferred_headings", processing.get("inferred_headings", 0)),
+        ("inferred_table_headers", processing.get("inferred_table_headers", 0)),
         ("warnings", warnings),
     ]
     header = "\n".join(f"{key}: {_yaml_scalar(value)}" for key, value in metadata)

@@ -74,6 +74,9 @@ def convert_document(
     word_images_omitted = 0
     word_headers_footers_omitted = False
     word_features_omitted: list[str] = []
+    word_suspicious_text_sequences = 0
+    word_inferred_headings = 0
+    word_inferred_table_headers = 0
     errors: list[dict[str, object]] = []
     cancelled = False
     notify_progress(progress_callback, "preparing", 0, 1)
@@ -153,6 +156,11 @@ def convert_document(
                 omitted = processing.get("features_omitted")
                 if isinstance(omitted, list):
                     word_features_omitted = [str(feature) for feature in omitted]
+                word_suspicious_text_sequences += int(
+                    processing.get("suspicious_text_sequences", 0) or 0
+                )
+                word_inferred_headings += int(processing.get("inferred_headings", 0) or 0)
+                word_inferred_table_headers += int(processing.get("inferred_table_headers", 0) or 0)
 
             segment_count, remains_oversized = writer.add(sanitized, cancellation_token)
             if segment_count > 1:
@@ -253,6 +261,13 @@ def convert_document(
             "list_items": word_list_count,
             "tables": word_table_count,
             "sections": word_section_count,
+            "inferred_headings": word_inferred_headings,
+            "inferred_table_headers": word_inferred_table_headers,
+        }
+        report["text_quality"] = {
+            "suspected_encoding_corruption": bool(word_suspicious_text_sequences),
+            "suspicious_sequences": word_suspicious_text_sequences,
+            "automatic_text_repair_applied": False,
         }
         report["omitted_content"] = {
             "images": word_images_omitted,
@@ -260,20 +275,6 @@ def convert_document(
             "advanced_features": word_features_omitted,
             "external_references_downloaded": False,
         }
-    elif converter.record_type == "word_document":
-        write_word_readme(
-            output_dir,
-            source_name=input_path.name,
-            converted_records=converted,
-            part_count=len(writer.parts),
-            block_count=word_block_count,
-            section_count=word_section_count,
-            table_count=word_table_count,
-            image_count=word_images_omitted,
-            headers_footers_omitted=word_headers_footers_omitted,
-            features_omitted=word_features_omitted,
-            cancelled=cancelled,
-        )
     else:
         report["text_extraction"] = {
             "encoding": encoding,
@@ -295,6 +296,23 @@ def convert_document(
             pages_without_text=pdf_pages_without_text,
             embedded_file_count=embedded_file_count,
             image_count=image_count,
+            cancelled=cancelled,
+        )
+    elif converter.record_type == "word_document":
+        write_word_readme(
+            output_dir,
+            source_name=input_path.name,
+            converted_records=converted,
+            part_count=len(writer.parts),
+            block_count=word_block_count,
+            section_count=word_section_count,
+            table_count=word_table_count,
+            image_count=word_images_omitted,
+            headers_footers_omitted=word_headers_footers_omitted,
+            features_omitted=word_features_omitted,
+            suspicious_text_sequences=word_suspicious_text_sequences,
+            inferred_headings=word_inferred_headings,
+            inferred_table_headers=word_inferred_table_headers,
             cancelled=cancelled,
         )
     else:

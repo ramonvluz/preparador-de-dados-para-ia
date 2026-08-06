@@ -1,6 +1,10 @@
 import hashlib
 from pathlib import Path
 
+from docx import Document
+from docx.oxml.ns import qn
+from docx.shared import Pt
+
 from limebh_preparador.application.progress import ConversionProgress
 from limebh_preparador.application.service import convert_source
 from limebh_preparador.core.cancellation import CancellationToken
@@ -32,6 +36,13 @@ def test_word_conversion_generates_structured_markdown_and_audit_report(
         "list_items": 5,
         "tables": 1,
         "sections": 5,
+        "inferred_headings": 0,
+        "inferred_table_headers": 0,
+    }
+    assert report["text_quality"] == {
+        "suspected_encoding_corruption": False,
+        "suspicious_sequences": 0,
+        "automatic_text_repair_applied": False,
     }
     assert report["omitted_content"] == {
         "images": 1,
@@ -48,8 +59,77 @@ def test_word_conversion_generates_structured_markdown_and_audit_report(
     assert "Risco \\| mitigação" in ready_text
     assert "IMAGEM ARTIFICIAL" not in ready_text
     assert str(FIXTURE.resolve()) not in ready_text
-    assert (output / "LEIA-ME.txt").is_file()
+    readme = (output / "LEIA-ME.txt").read_text(encoding="utf-8")
+    assert "Tipo identificado: DOCX" in readme
+    assert "Títulos inferidos por formatação: 0" in readme
     assert (output / "relatorio_conversao.json").is_file()
+
+
+def test_word_conversion_surfaces_quality_warning_and_inferred_structure(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "origem_sem_estilos.docx"
+    document = Document()
+    title = document.add_paragraph()
+    title_run = title.add_run("Documento sem estilos")
+    title_run.bold = True
+    title_run.font.size = Pt(18)
+    heading = document.add_paragraph()
+    heading_run = heading.add_run("1. Definiçºµo")
+    heading_run.bold = True
+    heading_run.font.size = Pt(12)
+    document.add_paragraph("Conteúdo de validação preservado.")
+    table = document.add_table(rows=2, cols=3)
+    table_look = table._tbl.tblPr.find(qn("w:tblLook"))
+    if table_look is not None:
+        table_look.set(qn("w:firstRow"), "0")
+    for cell, value in zip(
+        table.rows[0].cells,
+        ("Serviço", "Objetivo", "Resultado"),
+        strict=True,
+    ):
+        cell.text = value
+    for cell, value in zip(
+        table.rows[1].cells,
+        (
+            "Diagnóstico Estratégico",
+            "Compreender detalhadamente a operação da empresa",
+            "Plano executivo priorizado para orientar decisões",
+        ),
+        strict=True,
+    ):
+        cell.text = value
+    document.save(source)
+    output = tmp_path / "saida_sem_estilos"
+
+    report = convert_source(source, output)
+
+    assert report["result"] == "success_with_warnings"
+    assert report["warnings_count"] == 1
+    assert report["word_extraction"] == {
+        "block_count": 4,
+        "paragraphs": 1,
+        "headings": 2,
+        "list_items": 0,
+        "tables": 1,
+        "sections": 2,
+        "inferred_headings": 2,
+        "inferred_table_headers": 1,
+    }
+    assert report["text_quality"] == {
+        "suspected_encoding_corruption": True,
+        "suspicious_sequences": 1,
+        "automatic_text_repair_applied": False,
+    }
+    markdown = (output / "PRONTO_PARA_IA" / "documento_parte_0001.md").read_text(encoding="utf-8")
+    assert "# Documento sem estilos" in markdown
+    assert "# 1. Definiçºµo" in markdown
+    assert "| Serviço | Objetivo | Resultado |" in markdown
+    assert "| Coluna 1 |" not in markdown
+    assert "Aviso de qualidade do texto" in markdown
+    readme = (output / "LEIA-ME.txt").read_text(encoding="utf-8")
+    assert "Tipo identificado: DOCX" in readme
+    assert "ATENÇÃO: foram detectadas 1 sequência(s)" in readme
 
 
 def test_invalid_docx_fails_without_exposing_content(tmp_path: Path) -> None:

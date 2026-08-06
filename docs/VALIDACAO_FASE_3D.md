@@ -40,6 +40,28 @@ Quando uma tabela precisa ser particionada, o cabeçalho é repetido em cada
 segmento. Unidades textuais grandes preferem limites de parágrafo, linha e
 palavra antes do corte estrito.
 
+## Robustez para DOCX gerado por terceiros
+
+O teste com um documento real gerado por `html-to-docx` motivou um incremento
+de robustez. Alguns geradores gravam todos os parágrafos como estilo `Normal`,
+mesmo quando o texto está visualmente em negrito e funciona como título. Nesses
+casos, o conversor pode inferir conservadoramente:
+
+- um título curto em negrito com tamanho explícito de pelo menos 14 pontos;
+- títulos numerados curtos cujo conteúdo inteiro esteja em negrito;
+- a primeira linha de uma tabela como cabeçalho quando ela é curta, completa e
+  possui indicação visual ou é seguida por células claramente descritivas.
+
+As inferências aparecem no contrato, no relatório e no LEIA-ME. Estilos Word
+semânticos continuam tendo prioridade, listas reais não são convertidas em
+títulos e uma tabela com cabeçalho declarado não é contabilizada como inferida.
+
+O conversor também procura sequências Unicode improváveis associadas a texto
+corrompido. Quando encontra alguma, preserva o conteúdo exatamente como está,
+marca o resultado como concluído com avisos e informa a quantidade no Markdown,
+no relatório e no LEIA-ME. Nenhuma reconstrução automática é aplicada, pois ela
+poderia trocar silenciosamente o conteúdo original.
+
 ## Segurança e conteúdo omitido
 
 Antes da abertura, o pacote DOCX é verificado quanto à estrutura obrigatória,
@@ -78,6 +100,8 @@ A suíte cobre:
 - lista aninhada e distinção entre marcador e numeração;
 - tabela com cabeçalho, células e escape de `|`;
 - metadados e recursos omitidos;
+- detecção de caracteres suspeitos sem alteração do texto;
+- inferência conservadora de títulos e cabeçalhos de tabela;
 - segmentação de parágrafo grande dentro dos limites;
 - DOCX inválido sem exposição do conteúdo;
 - cancelamento seguro;

@@ -69,7 +69,8 @@
       "properties": {
         "type": { "const": "heading" },
         "text": { "type": "string" },
-        "level": { "type": "integer", "minimum": 1 }
+        "level": { "type": "integer", "minimum": 1 },
+        "inferred": { "type": "boolean" }
       },
       "additionalProperties": false
     },
@@ -96,7 +97,8 @@
             "items": { "type": "string" }
           }
         },
-        "has_header": { "type": "boolean" }
+        "has_header": { "type": "boolean" },
+        "header_inferred": { "type": "boolean" }
       },
       "additionalProperties": false
     },
@@ -114,6 +116,9 @@
           "items": { "type": "string" },
           "uniqueItems": true
         },
+        "suspicious_text_sequences": { "type": "integer", "minimum": 0 },
+        "inferred_headings": { "type": "integer", "minimum": 0 },
+        "inferred_table_headers": { "type": "integer", "minimum": 0 },
         "segment_number": { "type": "integer", "minimum": 1 },
         "segment_count": { "type": "integer", "minimum": 1 }
       },
