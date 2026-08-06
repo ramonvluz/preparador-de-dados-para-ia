@@ -8,9 +8,10 @@ a conversão incremental de MBOX, o contrato versionado `email_message`, limpeza
 Unicode auditável, particionamento por bytes e tokens, saídas JSON/JSONL,
 relatório, cancelamento seguro, CLI e interface desktop.
 
-A fundação da Fase 3 também está pronta: contratos versionados para TXT/Markdown,
-PDF e DOCX, uma interface comum de conversores e um registro extensível por
-extensão. A extração desses formatos será incorporada nos próximos incrementos.
+A Fase 3 já converte TXT e Markdown para partes Markdown autossuficientes, com
+detecção de codificação, títulos, seções e limpeza Unicode auditável. Os
+contratos de PDF e DOCX, a interface comum de conversores e o registro extensível
+por extensão também estão prontos para os próximos incrementos.
 
 ## Princípios de segurança
 
@@ -35,11 +36,14 @@ No PowerShell, a partir da raiz do projeto:
 ```
 
 Por padrão, o resultado é criado em `Downloads\Preparador LIMEBH`, com uma
-pasta exclusiva para a conversão. O perfil `platform` gera JSON particionado e
-o perfil `api` gera JSONL particionado.
+pasta exclusiva para a conversão. Para MBOX, o perfil `platform` gera JSON
+particionado e o perfil `api` gera JSONL. TXT e Markdown geram Markdown
+particionado nos dois perfis, conforme a recomendação automática do PRD.
 
 ```powershell
 .\.venv\Scripts\limebh-preparador.exe emails.mbox --profile api
+.\.venv\Scripts\limebh-preparador.exe manual.txt
+.\.venv\Scripts\limebh-preparador.exe orientacoes.md --profile api
 .\.venv\Scripts\limebh-preparador.exe emails.mbox --output C:\saida\conversao
 .\.venv\Scripts\limebh-preparador.exe emails.mbox --max-size-mb 25 --max-tokens 250000
 ```
@@ -61,9 +65,10 @@ Também é possível executar diretamente como módulo:
 .\.venv\Scripts\python.exe -m limebh_preparador.ui
 ```
 
-A interface seleciona um MBOX, recomenda JSON ou JSONL conforme o perfil,
-utiliza `Downloads\Preparador LIMEBH` por padrão e executa a conversão em uma
-thread separada. O cancelamento preserva partes concluídas e válidas.
+A interface seleciona MBOX, TXT ou Markdown e apresenta a saída recomendada
+para cada combinação de fonte e perfil. Ela utiliza `Downloads\Preparador
+LIMEBH` por padrão e executa a conversão em uma thread separada. O cancelamento
+preserva partes concluídas e válidas.
 
 ## Verificação
 
@@ -80,3 +85,4 @@ fixtures em `tests/fixtures` são artificiais e usam domínios reservados.
 - [Validação de equivalência](docs/VALIDACAO_EQUIVALENCIA.md)
 - [Validação da Fase 2 — MVP desktop](docs/VALIDACAO_FASE_2.md)
 - [Validação da Fase 3A — contratos e arquitetura](docs/VALIDACAO_FASE_3A.md)
+- [Validação da Fase 3B — TXT e Markdown](docs/VALIDACAO_FASE_3B.md)

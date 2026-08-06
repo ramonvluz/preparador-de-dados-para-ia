@@ -8,6 +8,7 @@ from limebh_preparador.application.conversion import (
     ConversionSettings,
     DestinationProfile,
 )
+from limebh_preparador.application.service import SUPPORTED_SOURCE_EXTENSIONS
 
 
 class UiProfile(StrEnum):
@@ -27,7 +28,18 @@ class FormatRecommendation:
     explanation: str
 
 
-def recommendation_for(profile: UiProfile) -> FormatRecommendation:
+def recommendation_for(
+    profile: UiProfile,
+    source: Path | None = None,
+) -> FormatRecommendation:
+    if source is not None and source.suffix.lower() in {".txt", ".md", ".markdown"}:
+        return FormatRecommendation(
+            format_name="Markdown particionado",
+            explanation=(
+                "Texto limpo com metadados e partes numeradas, adequado tanto para envio "
+                "manual quanto para busca semântica."
+            ),
+        )
     if profile is UiProfile.API:
         return FormatRecommendation(
             format_name="JSONL particionado",
@@ -53,9 +65,9 @@ class DesktopConversionRequest:
 
     def validate(self) -> None:
         if not self.source.is_file():
-            raise FileNotFoundError(f"Arquivo MBOX não encontrado: {self.source}")
-        if self.source.suffix.lower() != ".mbox":
-            raise ValueError("Selecione um arquivo com extensão .mbox.")
+            raise FileNotFoundError(f"Arquivo não encontrado: {self.source}")
+        if self.source.suffix.lower() not in SUPPORTED_SOURCE_EXTENSIONS:
+            raise ValueError("Selecione um arquivo MBOX, TXT ou Markdown.")
         if self.output_root.exists() and not self.output_root.is_dir():
             raise NotADirectoryError(f"O destino selecionado não é uma pasta: {self.output_root}")
 
@@ -63,7 +75,7 @@ class DesktopConversionRequest:
     def settings(self) -> ConversionSettings:
         return ConversionSettings(
             profile=self.profile.destination_profile,
-            include_html=self.include_html,
+            include_html=self.include_html and self.source.suffix.lower() == ".mbox",
         )
 
 

@@ -15,3 +15,13 @@ class ConversionProgress:
 
 
 ProgressCallback = Callable[[ConversionProgress], None]
+
+
+def notify_progress(
+    callback: ProgressCallback | None,
+    stage: ProgressStage,
+    current: int,
+    total: int | None = None,
+) -> None:
+    if callback is not None:
+        callback(ConversionProgress(stage=stage, current=current, total=total))

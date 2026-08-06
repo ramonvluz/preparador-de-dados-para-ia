@@ -10,6 +10,11 @@ from tkinter import filedialog, messagebox, ttk
 
 from limebh_preparador import __version__
 from limebh_preparador.application.naming import find_possible_duplicates
+from limebh_preparador.application.service import (
+    SUPPORTED_SOURCE_EXTENSIONS,
+    source_format_label,
+    source_unit_label,
+)
 from limebh_preparador.core.paths import default_output_root
 from limebh_preparador.ui.state import (
     DesktopConversionRequest,
@@ -54,13 +59,13 @@ class PreparadorApp:
         self.include_html_var = tk.BooleanVar(value=False)
         self.file_name_var = tk.StringVar(value="Nenhum arquivo selecionado")
         self.file_detail_var = tk.StringVar(
-            value="Adicione um arquivo MBOX para começar. O original permanecerá intocado."
+            value="Adicione um arquivo MBOX, TXT ou Markdown. O original permanecerá intocado."
         )
         self.file_path_var = tk.StringVar(value="")
         self.format_var = tk.StringVar()
         self.recommendation_var = tk.StringVar()
         self.status_var = tk.StringVar(value="Aguardando um arquivo")
-        self.counter_var = tk.StringVar(value="0 mensagens processadas")
+        self.counter_var = tk.StringVar(value="0 unidades processadas")
         self.summary_var = tk.StringVar(value="Ao final, o resumo da conversão será exibido aqui.")
 
         self._configure_window()
@@ -267,7 +272,10 @@ class PreparadorApp:
         self.title_label.grid(row=0, column=0, sticky="w")
         self.subtitle_label = ttk.Label(
             self.header,
-            text=("Converta e-mails em arquivos estruturados, particionados e prontos para IA."),
+            text=(
+                "Converta e-mails e documentos em arquivos estruturados, "
+                "particionados e prontos para IA."
+            ),
             style="Subtitle.TLabel",
         )
         self.subtitle_label.grid(row=1, column=0, sticky="w", pady=(3, 0))
@@ -298,7 +306,7 @@ class PreparadorApp:
         self.file_actions.grid(row=0, column=1, sticky="e")
         self.add_button = ttk.Button(
             self.file_actions,
-            text="Adicionar MBOX",
+            text="Adicionar arquivo",
             style="Secondary.TButton",
             command=self._choose_source,
         )
@@ -779,7 +787,7 @@ class PreparadorApp:
 
     def _update_recommendation(self) -> None:
         profile = UiProfile(self.profile_var.get())
-        recommendation = recommendation_for(profile)
+        recommendation = recommendation_for(profile, self.source_path)
         self.format_var.set(recommendation.format_name)
         self.recommendation_var.set(recommendation.explanation)
 
@@ -787,35 +795,47 @@ class PreparadorApp:
         initial_dir = self.source_path.parent if self.source_path else Path.home()
         selected = filedialog.askopenfilename(
             parent=self.root,
-            title="Selecionar arquivo MBOX",
+            title="Selecionar arquivo de origem",
             initialdir=initial_dir,
-            filetypes=[("Arquivo MBOX", "*.mbox"), ("Todos os arquivos", "*.*")],
+            filetypes=[
+                ("Formatos suportados", "*.mbox *.txt *.md *.markdown"),
+                ("MBOX", "*.mbox"),
+                ("Texto", "*.txt"),
+                ("Markdown", "*.md *.markdown"),
+                ("Todos os arquivos", "*.*"),
+            ],
         )
         if not selected:
             return
         path = Path(selected)
-        if path.suffix.lower() != ".mbox":
+        if path.suffix.lower() not in SUPPORTED_SOURCE_EXTENSIONS:
             messagebox.showwarning(
                 "Formato não suportado",
-                "Nesta etapa, selecione um arquivo com extensão .mbox.",
+                "Selecione um arquivo MBOX, TXT ou Markdown.",
                 parent=self.root,
             )
             return
         self.source_path = path
         self.file_name_var.set(path.name)
-        self.file_detail_var.set(f"MBOX • {human_file_size(path.stat().st_size)}")
+        self.file_detail_var.set(
+            f"{source_format_label(path)} • {human_file_size(path.stat().st_size)}"
+        )
         self.file_path_var.set(str(path))
+        if path.suffix.lower() != ".mbox":
+            self.include_html_var.set(False)
         self.status_var.set("Pronto para converter")
+        self._update_recommendation()
         self._set_busy(False)
 
     def _remove_source(self) -> None:
         self.source_path = None
         self.file_name_var.set("Nenhum arquivo selecionado")
         self.file_detail_var.set(
-            "Adicione um arquivo MBOX para começar. O original permanecerá intocado."
+            "Adicione um arquivo MBOX, TXT ou Markdown. O original permanecerá intocado."
         )
         self.file_path_var.set("")
         self.status_var.set("Aguardando um arquivo")
+        self._update_recommendation()
         self._set_busy(False)
 
     def _choose_output_root(self) -> None:
@@ -832,7 +852,7 @@ class PreparadorApp:
         if self.source_path is None:
             messagebox.showinfo(
                 "Selecione um arquivo",
-                "Adicione um arquivo MBOX antes de iniciar.",
+                "Adicione um arquivo MBOX, TXT ou Markdown antes de iniciar.",
                 parent=self.root,
             )
             return
@@ -875,8 +895,8 @@ class PreparadorApp:
 
         self.last_output_dir = None
         self.summary_var.set("A conversão está em andamento. Você pode cancelar com segurança.")
-        self.status_var.set("Preparando o arquivo MBOX...")
-        self.counter_var.set("0 mensagens processadas")
+        self.status_var.set(f"Preparando o arquivo {source_format_label(self.source_path)}...")
+        self.counter_var.set(self._processed_count(0))
         self.progress.configure(mode="indeterminate", value=0)
         self.progress.start(12)
         self._set_busy(True)
@@ -916,12 +936,16 @@ class PreparadorApp:
         if isinstance(event, WorkerProgress):
             progress = event.progress
             if progress.stage == "preparing":
-                self.status_var.set("Preparando e indexando o arquivo MBOX...")
+                label = source_format_label(self.source_path) if self.source_path else "de origem"
+                self.status_var.set(f"Preparando e analisando o arquivo {label}...")
             elif progress.stage == "converting":
-                self.status_var.set("Convertendo mensagens...")
-                self.counter_var.set(
-                    f"{progress.current:,} mensagens processadas".replace(",", ".")
+                units = (
+                    source_unit_label(self.source_path, plural=True)
+                    if self.source_path
+                    else "unidades"
                 )
+                self.status_var.set(f"Convertendo {units}...")
+                self.counter_var.set(self._processed_count(progress.current))
             elif progress.stage == "writing":
                 self.status_var.set("Finalizando partes e relatório...")
             return
@@ -935,8 +959,8 @@ class PreparadorApp:
         self.progress.configure(mode="determinate", value=100, maximum=100)
         self.last_output_dir = event.output_dir
         report = event.report
-        converted = int(report.get("converted_messages", 0))
-        failed = int(report.get("failed_messages", 0))
+        converted = int(report.get("converted_records", report.get("converted_messages", 0)))
+        failed = int(report.get("failed_records", report.get("failed_messages", 0)))
         parts = report.get("parts")
         part_count = len(parts) if isinstance(parts, list) else 0
         duration = human_duration(float(report.get("duration_seconds", 0.0)))
@@ -947,10 +971,10 @@ class PreparadorApp:
             self.status_var.set("Conversão concluída com avisos")
         else:
             self.status_var.set("Conversão concluída")
-        self.counter_var.set(f"{converted:,} mensagens processadas".replace(",", "."))
-        summary = (
-            f"{converted:,} mensagens • {part_count} parte(s) • {failed} falha(s) • {duration}"
-        )
+        self.counter_var.set(self._processed_count(converted))
+        unit = str(report.get("unit_label", "registro"))
+        units = unit if converted == 1 else ("mensagens" if unit == "mensagem" else f"{unit}s")
+        summary = f"{converted:,} {units} • {part_count} parte(s) • {failed} falha(s) • {duration}"
         self.summary_var.set(summary.replace(",", "."))
         self._set_busy(False)
         self.open_output_button.state(["!disabled"])
@@ -996,11 +1020,19 @@ class PreparadorApp:
         self.profile_combo.state(["!disabled", "readonly"])
         self.output_entry.state(["!disabled"])
         self.destination_button.state(["!disabled"])
-        self.html_check.state(["!disabled"])
+        if self.source_path is not None and self.source_path.suffix.lower() == ".mbox":
+            self.html_check.state(["!disabled"])
+        else:
+            self.html_check.state(["disabled"])
         self.cancel_button.state(["disabled"])
         if self.last_output_dir is None:
             self.open_output_button.state(["disabled"])
             self.open_report_button.state(["disabled"])
+
+    def _processed_count(self, count: int) -> str:
+        if self.source_path is not None and self.source_path.suffix.lower() == ".mbox":
+            return f"{count:,} mensagens processadas".replace(",", ".")
+        return f"{count:,} documentos processados".replace(",", ".")
 
     def _open_output(self) -> None:
         if self.last_output_dir is not None:

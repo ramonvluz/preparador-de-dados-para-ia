@@ -6,9 +6,9 @@ from pathlib import Path
 from queue import Queue
 from threading import Thread
 
-from limebh_preparador.application.conversion import convert_mbox
 from limebh_preparador.application.naming import automatic_output_dir
 from limebh_preparador.application.progress import ConversionProgress
+from limebh_preparador.application.service import convert_source
 from limebh_preparador.core.cancellation import CancellationToken
 from limebh_preparador.ui.state import DesktopConversionRequest
 
@@ -82,7 +82,7 @@ class ConversionWorker:
             started_at = datetime.now(UTC)
             output_dir = automatic_output_dir(request.source, request.output_root, started_at)
             self.events.put(WorkerStarted(output_dir))
-            report = convert_mbox(
+            report = convert_source(
                 request.source,
                 output_dir,
                 settings=request.settings,

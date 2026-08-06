@@ -45,3 +45,20 @@ def test_worker_runs_core_outside_calling_thread(tmp_path: Path) -> None:
     assert progress_events
     assert (finished.output_dir / "PRONTO_PARA_IA").is_dir()
     assert (finished.output_dir / "relatorio_conversao.json").is_file()
+
+
+def test_worker_dispatches_markdown_without_blocking_calling_thread(tmp_path: Path) -> None:
+    source = tmp_path / "manual.md"
+    source.write_text("# Manual\n\nConteúdo local.", encoding="utf-8")
+    worker = ConversionWorker()
+    request = DesktopConversionRequest(source=source, output_root=tmp_path)
+
+    worker.start(request)
+    worker.wait(timeout=10)
+    events = _drain_events(worker)
+
+    finished = next(event for event in events if isinstance(event, WorkerFinished))
+    assert worker.is_active is False
+    assert finished.report["converted_records"] == 1
+    assert finished.report["output_format"] == "markdown"
+    assert list((finished.output_dir / "PRONTO_PARA_IA").glob("*.md"))

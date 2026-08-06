@@ -8,6 +8,7 @@ from typing import Protocol, runtime_checkable
 
 from limebh_preparador.application.progress import ProgressCallback
 from limebh_preparador.core.cancellation import CancellationToken
+from limebh_preparador.core.cleaning import UnicodeSanitizer
 
 
 @dataclass(frozen=True, slots=True)
@@ -19,6 +20,7 @@ class ConversionContext:
     converted_at: datetime
     cancellation_token: CancellationToken
     progress_callback: ProgressCallback | None = None
+    unicode_sanitizer: UnicodeSanitizer | None = None
     options: Mapping[str, object] = field(default_factory=dict)
 
     def __post_init__(self) -> None:

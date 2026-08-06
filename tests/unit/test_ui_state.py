@@ -22,6 +22,16 @@ def test_profile_recommendations_map_to_core_profiles() -> None:
     assert UiProfile.API.destination_profile is DestinationProfile.API
 
 
+def test_text_sources_always_recommend_markdown(tmp_path: Path) -> None:
+    source = tmp_path / "manual.txt"
+
+    platform = recommendation_for(UiProfile.PLATFORM, source)
+    api = recommendation_for(UiProfile.API, source)
+
+    assert platform.format_name == "Markdown particionado"
+    assert api.format_name == "Markdown particionado"
+
+
 def test_desktop_request_validates_source_and_builds_settings(tmp_path: Path) -> None:
     source = tmp_path / "artificial.mbox"
     source.write_text("From artificial@example.invalid\n", encoding="utf-8")
@@ -38,12 +48,26 @@ def test_desktop_request_validates_source_and_builds_settings(tmp_path: Path) ->
 
 
 def test_desktop_request_rejects_unsupported_extension(tmp_path: Path) -> None:
-    source = tmp_path / "artificial.txt"
+    source = tmp_path / "artificial.pdf"
     source.write_text("artificial", encoding="utf-8")
     request = DesktopConversionRequest(source=source, output_root=tmp_path)
 
-    with pytest.raises(ValueError, match="extensão .mbox"):
+    with pytest.raises(ValueError, match="MBOX, TXT ou Markdown"):
         request.validate()
+
+
+@pytest.mark.parametrize("suffix", [".txt", ".md", ".markdown"])
+def test_desktop_request_accepts_text_formats_and_ignores_html(
+    tmp_path: Path,
+    suffix: str,
+) -> None:
+    source = tmp_path / f"artificial{suffix}"
+    source.write_text("# Artificial", encoding="utf-8")
+    request = DesktopConversionRequest(source=source, output_root=tmp_path, include_html=True)
+
+    request.validate()
+
+    assert request.settings.include_html is False
 
 
 @pytest.mark.parametrize(

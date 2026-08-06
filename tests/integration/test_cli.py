@@ -14,3 +14,16 @@ def test_cli_is_a_client_of_the_core(tmp_path: Path, capsys: object) -> None:
     assert exit_code == 0
     assert "2/2 mensagens" in captured.out
     assert list((output / "PRONTO_PARA_IA").glob("*.jsonl"))
+
+
+def test_cli_dispatches_text_sources_to_markdown(tmp_path: Path, capsys: object) -> None:
+    source = tmp_path / "manual.txt"
+    source.write_text("MANUAL\n\nConteúdo local.", encoding="utf-8")
+    output = tmp_path / "texto_cli"
+
+    exit_code = main([str(source), "--output", str(output), "--profile", "api"])
+
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert "1/1 documento" in captured.out
+    assert list((output / "PRONTO_PARA_IA").glob("*.md"))

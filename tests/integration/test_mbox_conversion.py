@@ -37,6 +37,8 @@ def test_platform_conversion_preserves_source_and_generates_contract_outputs(
     assert report["result"] == "success"
     assert report["converted_messages"] == 2
     assert report["failed_messages"] == 0
+    assert report["converted_records"] == 2
+    assert report["unit_label"] == "mensagem"
     assert report["attachments_catalogued"] == 1
     assert (output / "LEIA-ME.txt").is_file()
     assert (output / "relatorio_conversao.json").is_file()

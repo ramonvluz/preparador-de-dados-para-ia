@@ -11,7 +11,7 @@ def slugify_filename(path: Path) -> str:
     decomposed = unicodedata.normalize("NFKD", path.stem)
     ascii_name = decomposed.encode("ascii", errors="ignore").decode("ascii").lower()
     slug = re.sub(r"[^a-z0-9]+", "_", ascii_name).strip("_")
-    return slug[:100] or "conversao_mbox"
+    return slug[:100] or "conversao"
 
 
 def automatic_output_dir(input_path: Path, output_root: Path, started_at: datetime) -> Path:

@@ -7,9 +7,10 @@ from enum import StrEnum
 from pathlib import Path
 from uuid import uuid4
 
+from limebh_preparador.application.output_setup import prepare_output
 from limebh_preparador.application.progress import (
-    ConversionProgress,
     ProgressCallback,
+    notify_progress,
 )
 from limebh_preparador.converters.email import message_to_record
 from limebh_preparador.core.cancellation import CancellationToken, ConversionCancelled
@@ -46,28 +47,6 @@ class ConversionSettings:
         return OutputFormat.JSON
 
 
-def _notify(
-    callback: ProgressCallback | None,
-    stage: str,
-    current: int,
-    total: int | None = None,
-) -> None:
-    if callback is not None:
-        callback(ConversionProgress(stage=stage, current=current, total=total))  # type: ignore[arg-type]
-
-
-def _prepare_output(output_dir: Path) -> Path:
-    if output_dir.exists() and any(output_dir.iterdir()):
-        raise FileExistsError(
-            "A pasta de saída já contém arquivos. Use uma pasta nova para não misturar resultados: "
-            f"{output_dir}"
-        )
-    output_dir.mkdir(parents=True, exist_ok=True)
-    ready_dir = output_dir / "PRONTO_PARA_IA"
-    ready_dir.mkdir()
-    return ready_dir
-
-
 def _append_record_warning(record: dict[str, object], warning: str) -> dict[str, object]:
     updated = dict(record)
     processing = dict(updated.get("processing") or {})
@@ -99,7 +78,7 @@ def convert_mbox(
     if started_at.tzinfo is None:
         started_at = started_at.replace(tzinfo=UTC)
 
-    ready_dir = _prepare_output(output_dir)
+    ready_dir = prepare_output(output_dir)
     writer = PartWriter(
         ready_dir,
         PartitionLimits(max_bytes=settings.max_bytes, max_tokens=settings.max_tokens),
@@ -110,7 +89,7 @@ def convert_mbox(
     segmented_messages = oversized_messages = attachment_count = 0
     errors: list[dict[str, object]] = []
     cancelled = False
-    _notify(progress_callback, "preparing", 0)
+    notify_progress(progress_callback, "preparing", 0)
 
     mbox = mailbox.mbox(input_path, create=False)
     try:
@@ -157,12 +136,12 @@ def convert_mbox(
                         "error_type": type(error).__name__,
                     }
                 )
-            _notify(progress_callback, "converting", index)
+            notify_progress(progress_callback, "converting", index)
     except ConversionCancelled:
         cancelled = True
     finally:
         mbox.close()
-        _notify(progress_callback, "writing", converted, total)
+        notify_progress(progress_callback, "writing", converted, total)
         writer.flush()
 
     finished_at = datetime.now(UTC)
@@ -213,6 +192,12 @@ def convert_mbox(
         "failed_messages": failed,
         "segmented_messages": segmented_messages,
         "oversized_messages": oversized_messages,
+        "unit_label": "mensagem",
+        "total_records": total,
+        "converted_records": converted,
+        "failed_records": failed,
+        "segmented_records": segmented_messages,
+        "oversized_records": oversized_messages,
         "attachments_catalogued": attachment_count,
         "unicode_cleanup": sanitizer.report(),
         "parts": [part.as_dict() for part in writer.parts],
@@ -235,7 +220,7 @@ def convert_mbox(
         cancelled=cancelled,
     )
     write_report(output_dir, report)
-    _notify(
+    notify_progress(
         progress_callback,
         "cancelled" if cancelled else "completed",
         converted,
