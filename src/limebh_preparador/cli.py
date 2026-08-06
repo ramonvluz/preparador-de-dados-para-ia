@@ -28,7 +28,7 @@ from limebh_preparador.core.paths import default_output_root
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
-            "Prepara arquivos MBOX, TXT, Markdown ou PDF para uso com IA, "
+            "Prepara arquivos MBOX, TXT, Markdown, PDF ou DOCX para uso com IA, "
             "sem enviar dados à internet."
         )
     )

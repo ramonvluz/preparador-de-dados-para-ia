@@ -101,7 +101,12 @@ def build_word_document_record(
     converted_at: datetime | None = None,
     warnings: list[str] | None = None,
     unicode_cleaned: bool = True,
+    images_omitted: int = 0,
+    headers_footers_omitted: bool = False,
+    features_omitted: Sequence[str] = (),
 ) -> dict[str, object]:
+    if images_omitted < 0:
+        raise ValueError("A quantidade de imagens omitidas não pode ser negativa")
     data = {
         "title": title,
         "author": author,
@@ -118,4 +123,9 @@ def build_word_document_record(
         converted_at=converted_at,
         warnings=warnings,
         unicode_cleaned=unicode_cleaned,
+        processing={
+            "images_omitted": images_omitted,
+            "headers_footers_omitted": headers_footers_omitted,
+            "features_omitted": list(features_omitted),
+        },
     )

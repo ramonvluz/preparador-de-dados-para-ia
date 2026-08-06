@@ -32,6 +32,14 @@ def recommendation_for(
     profile: UiProfile,
     source: Path | None = None,
 ) -> FormatRecommendation:
+    if source is not None and source.suffix.lower() == ".docx":
+        return FormatRecommendation(
+            format_name="Markdown estruturado",
+            explanation=(
+                "Títulos, parágrafos, listas, seções e tabelas simples preservados "
+                "em partes numeradas."
+            ),
+        )
     if source is not None and source.suffix.lower() == ".pdf":
         return FormatRecommendation(
             format_name="Markdown com páginas",
@@ -75,7 +83,7 @@ class DesktopConversionRequest:
         if not self.source.is_file():
             raise FileNotFoundError(f"Arquivo não encontrado: {self.source}")
         if self.source.suffix.lower() not in SUPPORTED_SOURCE_EXTENSIONS:
-            raise ValueError("Selecione um arquivo MBOX, TXT, Markdown ou PDF.")
+            raise ValueError("Selecione um arquivo MBOX, TXT, Markdown, PDF ou DOCX.")
         if self.output_root.exists() and not self.output_root.is_dir():
             raise NotADirectoryError(f"O destino selecionado não é uma pasta: {self.output_root}")
 

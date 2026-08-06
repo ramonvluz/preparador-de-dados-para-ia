@@ -48,11 +48,11 @@ def test_desktop_request_validates_source_and_builds_settings(tmp_path: Path) ->
 
 
 def test_desktop_request_rejects_unsupported_extension(tmp_path: Path) -> None:
-    source = tmp_path / "artificial.docx"
+    source = tmp_path / "artificial.xlsx"
     source.write_text("artificial", encoding="utf-8")
     request = DesktopConversionRequest(source=source, output_root=tmp_path)
 
-    with pytest.raises(ValueError, match="MBOX, TXT, Markdown ou PDF"):
+    with pytest.raises(ValueError, match="MBOX, TXT, Markdown, PDF ou DOCX"):
         request.validate()
 
 
@@ -63,6 +63,15 @@ def test_pdf_source_recommends_markdown_with_page_markers(tmp_path: Path) -> Non
 
     assert recommendation.format_name == "Markdown com páginas"
     assert "marcadores explícitos" in recommendation.explanation
+
+
+def test_word_source_recommends_structured_markdown(tmp_path: Path) -> None:
+    source = tmp_path / "artificial.docx"
+
+    recommendation = recommendation_for(UiProfile.API, source)
+
+    assert recommendation.format_name == "Markdown estruturado"
+    assert "tabelas simples" in recommendation.explanation
 
 
 @pytest.mark.parametrize("suffix", [".txt", ".md", ".markdown"])

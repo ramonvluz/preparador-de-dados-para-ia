@@ -15,9 +15,11 @@ from limebh_preparador.outputs.artifacts import (
     write_document_readme,
     write_pdf_readme,
     write_report,
+    write_word_readme,
 )
 from limebh_preparador.outputs.markdown import MarkdownDocumentWriter
 from limebh_preparador.outputs.pdf_markdown import PdfMarkdownWriter
+from limebh_preparador.outputs.word_markdown import WordMarkdownWriter
 
 
 def convert_document(
@@ -48,12 +50,16 @@ def convert_document(
     ready_dir = prepare_output(output_dir)
     limits = PartitionLimits(max_bytes=settings.max_bytes, max_tokens=settings.max_tokens)
     if converter.record_type == "text_document":
-        writer: MarkdownDocumentWriter | PdfMarkdownWriter = MarkdownDocumentWriter(
-            ready_dir,
-            limits,
+        writer: MarkdownDocumentWriter | PdfMarkdownWriter | WordMarkdownWriter = (
+            MarkdownDocumentWriter(
+                ready_dir,
+                limits,
+            )
         )
     elif converter.record_type == "pdf_document":
         writer = PdfMarkdownWriter(ready_dir, limits)
+    elif converter.record_type == "word_document":
+        writer = WordMarkdownWriter(ready_dir, limits)
     else:
         raise ValueError(f"Não há gravador Markdown para {converter.record_type}")
     sanitizer = UnicodeSanitizer()
@@ -63,6 +69,11 @@ def convert_document(
     pdf_page_count = pdf_pages_with_text = pdf_pages_without_text = 0
     pdf_outline_count = embedded_file_count = image_count = 0
     ocr_applied = False
+    word_block_count = word_paragraph_count = word_heading_count = 0
+    word_list_count = word_table_count = word_section_count = 0
+    word_images_omitted = 0
+    word_headers_footers_omitted = False
+    word_features_omitted: list[str] = []
     errors: list[dict[str, object]] = []
     cancelled = False
     notify_progress(progress_callback, "preparing", 0, 1)
@@ -114,11 +125,34 @@ def convert_document(
                     len(embedded_files) if isinstance(embedded_files, list) else 0
                 )
                 image_count += len(images) if isinstance(images, list) else 0
+                blocks = data.get("blocks")
+                if isinstance(blocks, list):
+                    word_block_count += len(blocks)
+                    for block in blocks:
+                        if not isinstance(block, dict):
+                            continue
+                        block_type = block.get("type")
+                        if block_type == "paragraph":
+                            word_paragraph_count += 1
+                        elif block_type == "heading":
+                            word_heading_count += 1
+                        elif block_type == "list_item":
+                            word_list_count += 1
+                        elif block_type == "table":
+                            word_table_count += 1
+                    word_section_count += len(sections) if isinstance(sections, list) else 0
             if isinstance(processing, dict):
                 warnings = processing.get("warnings")
                 if isinstance(warnings, list):
                     warning_count += len(warnings)
                 ocr_applied = bool(processing.get("ocr_applied", False))
+                word_images_omitted = int(processing.get("images_omitted", 0) or 0)
+                word_headers_footers_omitted = bool(
+                    processing.get("headers_footers_omitted", False)
+                )
+                omitted = processing.get("features_omitted")
+                if isinstance(omitted, list):
+                    word_features_omitted = [str(feature) for feature in omitted]
 
             segment_count, remains_oversized = writer.add(sanitized, cancellation_token)
             if segment_count > 1:
@@ -211,6 +245,35 @@ def convert_document(
             "ocr_not_applied": not ocr_applied,
             "external_references_downloaded": False,
         }
+    elif converter.record_type == "word_document":
+        report["word_extraction"] = {
+            "block_count": word_block_count,
+            "paragraphs": word_paragraph_count,
+            "headings": word_heading_count,
+            "list_items": word_list_count,
+            "tables": word_table_count,
+            "sections": word_section_count,
+        }
+        report["omitted_content"] = {
+            "images": word_images_omitted,
+            "headers_footers": word_headers_footers_omitted,
+            "advanced_features": word_features_omitted,
+            "external_references_downloaded": False,
+        }
+    elif converter.record_type == "word_document":
+        write_word_readme(
+            output_dir,
+            source_name=input_path.name,
+            converted_records=converted,
+            part_count=len(writer.parts),
+            block_count=word_block_count,
+            section_count=word_section_count,
+            table_count=word_table_count,
+            image_count=word_images_omitted,
+            headers_footers_omitted=word_headers_footers_omitted,
+            features_omitted=word_features_omitted,
+            cancelled=cancelled,
+        )
     else:
         report["text_extraction"] = {
             "encoding": encoding,

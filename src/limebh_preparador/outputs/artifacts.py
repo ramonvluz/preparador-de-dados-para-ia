@@ -158,3 +158,64 @@ def write_pdf_readme(
     path = output_dir / "LEIA-ME.txt"
     atomic_write_text(path, "\n".join(lines) + "\n")
     return path
+
+
+def write_word_readme(
+    output_dir: Path,
+    *,
+    source_name: str,
+    converted_records: int,
+    part_count: int,
+    block_count: int,
+    section_count: int,
+    table_count: int,
+    image_count: int,
+    headers_footers_omitted: bool,
+    features_omitted: list[str],
+    cancelled: bool,
+) -> Path:
+    status_line = (
+        "A conversão foi cancelada com segurança; somente partes completas foram mantidas."
+        if cancelled
+        else "A conversão foi concluída."
+    )
+    omitted = []
+    if image_count:
+        omitted.append(f"{image_count} imagem(ns)")
+    if headers_footers_omitted:
+        omitted.append("cabeçalhos e rodapés")
+    omitted.extend(features_omitted)
+    omitted_line = ", ".join(omitted) if omitted else "nenhum recurso detectado"
+    lines = [
+        "PREPARADOR DE DADOS PARA IA — LIMEBH",
+        "",
+        status_line,
+        f"Fonte: {source_name}",
+        "Tipo identificado: DOCX",
+        f"Documentos convertidos: {converted_records}",
+        f"Blocos estruturais: {block_count}",
+        f"Seções detectadas: {section_count}",
+        f"Tabelas preservadas: {table_count}",
+        f"Partes geradas: {part_count}",
+        "Formato: MARKDOWN",
+        "",
+        "COMO USAR",
+        "Envie os arquivos da pasta PRONTO_PARA_IA em ordem numérica.",
+        "Os marcadores LIMEBH_WORD_BLOCK preservam o intervalo estrutural de origem.",
+        "",
+        "O QUE ESTÁ INCLUÍDO",
+        "Títulos, parágrafos, listas, seções, tabelas simples e metadados do documento.",
+        "",
+        "O QUE NÃO ESTÁ INCLUÍDO",
+        f"Recursos omitidos: {omitted_line}.",
+        "Macros, objetos incorporados e reconstrução visual avançada não são processados.",
+        "",
+        "PRIVACIDADE",
+        (
+            "A saída pode conter dados pessoais. Compartilhe apenas com pessoas "
+            "e serviços autorizados."
+        ),
+    ]
+    path = output_dir / "LEIA-ME.txt"
+    atomic_write_text(path, "\n".join(lines) + "\n")
+    return path

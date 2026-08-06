@@ -13,6 +13,7 @@ from limebh_preparador.ui.worker import (
 PROJECT_ROOT = Path(__file__).parents[2]
 FIXTURE = PROJECT_ROOT / "tests" / "fixtures" / "artificial_emails.mbox"
 PDF_FIXTURE = PROJECT_ROOT / "tests" / "fixtures" / "artificial_document.pdf"
+WORD_FIXTURE = PROJECT_ROOT / "tests" / "fixtures" / "artificial_document.docx"
 
 
 def _drain_events(worker: ConversionWorker) -> list[WorkerEvent]:
@@ -78,4 +79,20 @@ def test_worker_dispatches_pdf_and_reports_page_progress(tmp_path: Path) -> None
     assert worker.is_active is False
     assert finished.report["pdf_extraction"]["page_count"] == 3
     assert any(event.progress.current == 3 for event in progress)
+    assert list((finished.output_dir / "PRONTO_PARA_IA").glob("*.md"))
+
+
+def test_worker_dispatches_word_and_reports_structural_blocks(tmp_path: Path) -> None:
+    worker = ConversionWorker()
+    request = DesktopConversionRequest(source=WORD_FIXTURE, output_root=tmp_path)
+
+    worker.start(request)
+    worker.wait(timeout=10)
+    events = _drain_events(worker)
+
+    finished = next(event for event in events if isinstance(event, WorkerFinished))
+    progress = [event for event in events if isinstance(event, WorkerProgress)]
+    assert worker.is_active is False
+    assert finished.report["word_extraction"]["block_count"] == 18
+    assert any(event.progress.stage == "converting" for event in progress)
     assert list((finished.output_dir / "PRONTO_PARA_IA").glob("*.md"))

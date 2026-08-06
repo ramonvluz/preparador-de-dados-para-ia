@@ -9,18 +9,23 @@ from limebh_preparador.application.progress import ProgressCallback
 from limebh_preparador.converters.pdf import PdfDocumentConverter
 from limebh_preparador.converters.registry import ConverterRegistry
 from limebh_preparador.converters.text import TextDocumentConverter
+from limebh_preparador.converters.word import WordDocumentConverter
 from limebh_preparador.core.cancellation import CancellationToken
 
 MBOX_EXTENSION = ".mbox"
 PDF_EXTENSION = ".pdf"
+DOCX_EXTENSION = ".docx"
 TEXT_EXTENSIONS = TextDocumentConverter.supported_extensions
-SUPPORTED_SOURCE_EXTENSIONS = frozenset({MBOX_EXTENSION, PDF_EXTENSION, *TEXT_EXTENSIONS})
+SUPPORTED_SOURCE_EXTENSIONS = frozenset(
+    {MBOX_EXTENSION, PDF_EXTENSION, DOCX_EXTENSION, *TEXT_EXTENSIONS}
+)
 
 
 def build_default_registry() -> ConverterRegistry:
     registry = ConverterRegistry()
     registry.register(TextDocumentConverter())
     registry.register(PdfDocumentConverter())
+    registry.register(WordDocumentConverter())
     return registry
 
 
@@ -64,14 +69,19 @@ def source_format_id(path: Path) -> str:
         return "markdown"
     if suffix == ".pdf":
         return "pdf"
+    if suffix == ".docx":
+        return "docx"
     return suffix.removeprefix(".") or "unknown"
 
 
 def source_format_label(path: Path) -> str:
-    return {"mbox": "MBOX", "txt": "TXT", "markdown": "Markdown", "pdf": "PDF"}.get(
-        source_format_id(path),
-        "Desconhecido",
-    )
+    return {
+        "mbox": "MBOX",
+        "txt": "TXT",
+        "markdown": "Markdown",
+        "pdf": "PDF",
+        "docx": "DOCX",
+    }.get(source_format_id(path), "Desconhecido")
 
 
 def source_unit_label(path: Path, *, plural: bool = False) -> str:
@@ -79,4 +89,6 @@ def source_unit_label(path: Path, *, plural: bool = False) -> str:
         return "mensagens" if plural else "mensagem"
     if path.suffix.lower() == PDF_EXTENSION:
         return "páginas" if plural else "página"
+    if path.suffix.lower() == DOCX_EXTENSION:
+        return "blocos" if plural else "bloco"
     return "documentos" if plural else "documento"

@@ -107,6 +107,13 @@
         "converted_at": { "type": "string", "format": "date-time" },
         "unicode_cleaned": { "type": "boolean" },
         "warnings": { "type": "array", "items": { "type": "string" } },
+        "images_omitted": { "type": "integer", "minimum": 0 },
+        "headers_footers_omitted": { "type": "boolean" },
+        "features_omitted": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
         "segment_number": { "type": "integer", "minimum": 1 },
         "segment_count": { "type": "integer", "minimum": 1 }
       },
