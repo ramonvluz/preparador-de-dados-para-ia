@@ -8,7 +8,7 @@ from typing import Literal
 from limebh_preparador.contracts.common import build_document_record
 
 RECORD_TYPE = "pdf_document"
-PdfExtractionMethod = Literal["native", "ocr", "none"]
+PdfExtractionMethod = Literal["embedded_text", "ocr", "none"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -20,7 +20,7 @@ class PdfPage:
     def __post_init__(self) -> None:
         if self.page_number < 1:
             raise ValueError("O número da página deve ser positivo")
-        if self.extraction_method not in {"native", "ocr", "none"}:
+        if self.extraction_method not in {"embedded_text", "ocr", "none"}:
             raise ValueError("Método de extração de PDF inválido")
 
     def as_dict(self) -> dict[str, object]:

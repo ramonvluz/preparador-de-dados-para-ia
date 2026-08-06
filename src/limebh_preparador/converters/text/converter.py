@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 
+from limebh_preparador.application.progress import notify_progress
 from limebh_preparador.contracts.text import RECORD_TYPE, build_text_document_record
 from limebh_preparador.converters.base import ConversionContext
 from limebh_preparador.converters.text.reader import read_text_source
@@ -26,7 +27,7 @@ class TextDocumentConverter:
         is_markdown = suffix in {".md", ".markdown"}
         structure = analyze_text_structure(content, markdown=is_markdown)
         context.cancellation_token.raise_if_cancelled()
-        yield build_text_document_record(
+        record = build_text_document_record(
             source_file=context.source.name,
             source_file_type="markdown" if is_markdown else "txt",
             source_size_bytes=context.source_size_bytes,
@@ -38,3 +39,5 @@ class TextDocumentConverter:
             converted_at=context.converted_at,
             warnings=list(decoded.warnings),
         )
+        notify_progress(context.progress_callback, "converting", 1, 1)
+        yield record

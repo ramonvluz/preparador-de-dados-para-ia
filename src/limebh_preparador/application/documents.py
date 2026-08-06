@@ -11,8 +11,13 @@ from limebh_preparador.converters.base import ConversionContext, RecordConverter
 from limebh_preparador.core.cancellation import CancellationToken, ConversionCancelled
 from limebh_preparador.core.cleaning import UnicodeSanitizer, sanitize_record
 from limebh_preparador.core.partitioning import PartitionLimits
-from limebh_preparador.outputs.artifacts import write_document_readme, write_report
+from limebh_preparador.outputs.artifacts import (
+    write_document_readme,
+    write_pdf_readme,
+    write_report,
+)
 from limebh_preparador.outputs.markdown import MarkdownDocumentWriter
+from limebh_preparador.outputs.pdf_markdown import PdfMarkdownWriter
 
 
 def convert_document(
@@ -41,14 +46,23 @@ def convert_document(
         started_at = started_at.replace(tzinfo=UTC)
 
     ready_dir = prepare_output(output_dir)
-    writer = MarkdownDocumentWriter(
-        ready_dir,
-        PartitionLimits(max_bytes=settings.max_bytes, max_tokens=settings.max_tokens),
-    )
+    limits = PartitionLimits(max_bytes=settings.max_bytes, max_tokens=settings.max_tokens)
+    if converter.record_type == "text_document":
+        writer: MarkdownDocumentWriter | PdfMarkdownWriter = MarkdownDocumentWriter(
+            ready_dir,
+            limits,
+        )
+    elif converter.record_type == "pdf_document":
+        writer = PdfMarkdownWriter(ready_dir, limits)
+    else:
+        raise ValueError(f"Não há gravador Markdown para {converter.record_type}")
     sanitizer = UnicodeSanitizer()
     total = converted = failed = segmented = oversized = 0
     warning_count = heading_count = section_count = 0
     encoding: str | None = None
+    pdf_page_count = pdf_pages_with_text = pdf_pages_without_text = 0
+    pdf_outline_count = embedded_file_count = image_count = 0
+    ocr_applied = False
     errors: list[dict[str, object]] = []
     cancelled = False
     notify_progress(progress_callback, "preparing", 0, 1)
@@ -63,7 +77,7 @@ def convert_document(
         options={"profile": settings.profile.value},
     )
     try:
-        for index, record in enumerate(converter.convert(context), start=1):
+        for record in converter.convert(context):
             cancellation_token.raise_if_cancelled()
             total += 1
             if record.get("record_type") != converter.record_type:
@@ -81,8 +95,30 @@ def convert_document(
                 sections = data.get("sections")
                 heading_count += len(headings) if isinstance(headings, list) else 0
                 section_count += len(sections) if isinstance(sections, list) else 0
-            if isinstance(processing, dict) and isinstance(processing.get("warnings"), list):
-                warning_count += len(processing["warnings"])
+                pages = data.get("pages")
+                if isinstance(pages, list):
+                    pdf_page_count += len(pages)
+                    page_with_text_count = sum(
+                        1
+                        for page in pages
+                        if isinstance(page, dict) and bool(str(page.get("text") or "").strip())
+                    )
+                    pdf_pages_with_text += page_with_text_count
+                    pdf_pages_without_text += len(pages) - page_with_text_count
+                outline = data.get("outline")
+                if isinstance(outline, list):
+                    pdf_outline_count += _outline_item_count(outline)
+                embedded_files = data.get("embedded_files")
+                images = data.get("images")
+                embedded_file_count += (
+                    len(embedded_files) if isinstance(embedded_files, list) else 0
+                )
+                image_count += len(images) if isinstance(images, list) else 0
+            if isinstance(processing, dict):
+                warnings = processing.get("warnings")
+                if isinstance(warnings, list):
+                    warning_count += len(warnings)
+                ocr_applied = bool(processing.get("ocr_applied", False))
 
             segment_count, remains_oversized = writer.add(sanitized, cancellation_token)
             if segment_count > 1:
@@ -92,7 +128,6 @@ def convert_document(
                 oversized += 1
                 warning_count += 1
             converted += 1
-            notify_progress(progress_callback, "converting", index, 1)
     except ConversionCancelled:
         cancelled = True
     except Exception as error:
@@ -153,31 +188,62 @@ def convert_document(
         "segmented_records": segmented,
         "oversized_records": oversized,
         "warnings_count": warning_count,
-        "text_extraction": {
-            "encoding": encoding,
-            "headings_detected": heading_count,
-            "sections_detected": section_count,
-        },
         "unicode_cleanup": sanitizer.report(),
         "parts": [part.as_dict() for part in writer.parts],
         "errors": errors,
-        "omitted_content": {
-            "binary_attachments": 0,
-            "external_references_downloaded": False,
-        },
         "generated_files": generated_files,
         "result": result,
     }
 
-    write_document_readme(
-        output_dir,
-        source_name=input_path.name,
-        source_type=detected_format,
-        converted_records=converted,
-        part_count=len(writer.parts),
-        encoding=encoding,
-        cancelled=cancelled,
-    )
+    if converter.record_type == "pdf_document":
+        report["pdf_extraction"] = {
+            "page_count": pdf_page_count,
+            "pages_with_text": pdf_pages_with_text,
+            "pages_without_text": pdf_pages_without_text,
+            "outline_items": pdf_outline_count,
+            "embedded_files_catalogued": embedded_file_count,
+            "images_catalogued": image_count,
+            "ocr_applied": ocr_applied,
+        }
+        report["omitted_content"] = {
+            "embedded_file_binaries": embedded_file_count,
+            "image_binaries": image_count,
+            "ocr_not_applied": not ocr_applied,
+            "external_references_downloaded": False,
+        }
+    else:
+        report["text_extraction"] = {
+            "encoding": encoding,
+            "headings_detected": heading_count,
+            "sections_detected": section_count,
+        }
+        report["omitted_content"] = {
+            "binary_attachments": 0,
+            "external_references_downloaded": False,
+        }
+
+    if converter.record_type == "pdf_document":
+        write_pdf_readme(
+            output_dir,
+            source_name=input_path.name,
+            converted_records=converted,
+            part_count=len(writer.parts),
+            page_count=pdf_page_count,
+            pages_without_text=pdf_pages_without_text,
+            embedded_file_count=embedded_file_count,
+            image_count=image_count,
+            cancelled=cancelled,
+        )
+    else:
+        write_document_readme(
+            output_dir,
+            source_name=input_path.name,
+            source_type=detected_format,
+            converted_records=converted,
+            part_count=len(writer.parts),
+            encoding=encoding,
+            cancelled=cancelled,
+        )
     write_report(output_dir, report)
     notify_progress(
         progress_callback,
@@ -186,3 +252,15 @@ def convert_document(
         total,
     )
     return report
+
+
+def _outline_item_count(items: list[object]) -> int:
+    count = 0
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        count += 1
+        children = item.get("children")
+        if isinstance(children, list):
+            count += _outline_item_count(children)
+    return count

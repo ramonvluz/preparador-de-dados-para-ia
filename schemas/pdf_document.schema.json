@@ -64,7 +64,7 @@
       "properties": {
         "page_number": { "type": "integer", "minimum": 1 },
         "text": { "type": "string" },
-        "extraction_method": { "enum": ["native", "ocr", "none"] }
+        "extraction_method": { "enum": ["embedded_text", "ocr", "none"] }
       },
       "additionalProperties": false
     },

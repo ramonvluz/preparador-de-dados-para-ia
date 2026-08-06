@@ -28,7 +28,8 @@ from limebh_preparador.core.paths import default_output_root
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
-            "Prepara arquivos MBOX, TXT ou Markdown para uso com IA, sem enviar dados à internet."
+            "Prepara arquivos MBOX, TXT, Markdown ou PDF para uso com IA, "
+            "sem enviar dados à internet."
         )
     )
     parser.add_argument("input", type=Path, help="Caminho do arquivo de origem")
@@ -64,9 +65,16 @@ def _show_progress(progress: ConversionProgress, source: Path) -> None:
     units = source_unit_label(source, plural=progress.current != 1)
     if progress.stage == "preparing":
         print(f"Preparando o arquivo {source_format_label(source)}...")
-    elif progress.stage == "converting" and (progress.current == 1 or progress.current % 250 == 0):
-        participle = "Processadas" if source.suffix.lower() == ".mbox" else "Processados"
-        print(f"{participle} {progress.current} {units}...")
+    elif progress.stage == "converting" and (
+        progress.current == 1 or progress.current % 250 == 0 or progress.current == progress.total
+    ):
+        participle = "Processadas" if source.suffix.lower() in {".mbox", ".pdf"} else "Processados"
+        amount = (
+            f"{progress.current}/{progress.total}"
+            if progress.total is not None
+            else str(progress.current)
+        )
+        print(f"{participle} {amount} {units}...")
     elif progress.stage == "writing":
         print("Finalizando partes e relatório...")
     elif progress.stage == "cancelled":

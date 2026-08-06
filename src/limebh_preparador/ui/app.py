@@ -59,7 +59,9 @@ class PreparadorApp:
         self.include_html_var = tk.BooleanVar(value=False)
         self.file_name_var = tk.StringVar(value="Nenhum arquivo selecionado")
         self.file_detail_var = tk.StringVar(
-            value="Adicione um arquivo MBOX, TXT ou Markdown. O original permanecerá intocado."
+            value=(
+                "Adicione um arquivo MBOX, TXT, Markdown ou PDF. O original permanecerá intocado."
+            )
         )
         self.file_path_var = tk.StringVar(value="")
         self.format_var = tk.StringVar()
@@ -798,10 +800,11 @@ class PreparadorApp:
             title="Selecionar arquivo de origem",
             initialdir=initial_dir,
             filetypes=[
-                ("Formatos suportados", "*.mbox *.txt *.md *.markdown"),
+                ("Formatos suportados", "*.mbox *.txt *.md *.markdown *.pdf"),
                 ("MBOX", "*.mbox"),
                 ("Texto", "*.txt"),
                 ("Markdown", "*.md *.markdown"),
+                ("PDF", "*.pdf"),
                 ("Todos os arquivos", "*.*"),
             ],
         )
@@ -811,7 +814,7 @@ class PreparadorApp:
         if path.suffix.lower() not in SUPPORTED_SOURCE_EXTENSIONS:
             messagebox.showwarning(
                 "Formato não suportado",
-                "Selecione um arquivo MBOX, TXT ou Markdown.",
+                "Selecione um arquivo MBOX, TXT, Markdown ou PDF.",
                 parent=self.root,
             )
             return
@@ -831,7 +834,7 @@ class PreparadorApp:
         self.source_path = None
         self.file_name_var.set("Nenhum arquivo selecionado")
         self.file_detail_var.set(
-            "Adicione um arquivo MBOX, TXT ou Markdown. O original permanecerá intocado."
+            "Adicione um arquivo MBOX, TXT, Markdown ou PDF. O original permanecerá intocado."
         )
         self.file_path_var.set("")
         self.status_var.set("Aguardando um arquivo")
@@ -852,7 +855,7 @@ class PreparadorApp:
         if self.source_path is None:
             messagebox.showinfo(
                 "Selecione um arquivo",
-                "Adicione um arquivo MBOX, TXT ou Markdown antes de iniciar.",
+                "Adicione um arquivo MBOX, TXT, Markdown ou PDF antes de iniciar.",
                 parent=self.root,
             )
             return
@@ -1032,6 +1035,8 @@ class PreparadorApp:
     def _processed_count(self, count: int) -> str:
         if self.source_path is not None and self.source_path.suffix.lower() == ".mbox":
             return f"{count:,} mensagens processadas".replace(",", ".")
+        if self.source_path is not None and self.source_path.suffix.lower() == ".pdf":
+            return f"{count:,} páginas processadas".replace(",", ".")
         return f"{count:,} documentos processados".replace(",", ".")
 
     def _open_output(self) -> None:

@@ -89,7 +89,7 @@ def test_pdf_document_record_preserves_page_references_and_catalogs() -> None:
         title="Relatório",
         author="LIMEBH",
         pages=[
-            PdfPage(page_number=1, text="Página textual", extraction_method="native"),
+            PdfPage(page_number=1, text="Página textual", extraction_method="embedded_text"),
             PdfPage(page_number=2, text="Página digitalizada", extraction_method="ocr"),
         ],
         outline=[PdfOutlineItem(title="Introdução", page_number=1)],

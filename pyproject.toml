@@ -22,6 +22,7 @@ dependencies = [
 dev = [
   "jsonschema",
   "pytest",
+  "reportlab>=4.4,<5",
   "ruff",
 ]
 

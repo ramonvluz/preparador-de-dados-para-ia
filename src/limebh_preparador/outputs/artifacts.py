@@ -104,3 +104,57 @@ def write_document_readme(
     path = output_dir / "LEIA-ME.txt"
     atomic_write_text(path, "\n".join(lines) + "\n")
     return path
+
+
+def write_pdf_readme(
+    output_dir: Path,
+    *,
+    source_name: str,
+    converted_records: int,
+    part_count: int,
+    page_count: int,
+    pages_without_text: int,
+    embedded_file_count: int,
+    image_count: int,
+    cancelled: bool,
+) -> Path:
+    status_line = (
+        "A conversão foi cancelada com segurança; somente partes completas foram mantidas."
+        if cancelled
+        else "A conversão foi concluída."
+    )
+    lines = [
+        "PREPARADOR DE DADOS PARA IA — LIMEBH",
+        "",
+        status_line,
+        f"Fonte: {source_name}",
+        "Tipo identificado: PDF",
+        f"Documentos convertidos: {converted_records}",
+        f"Páginas catalogadas: {page_count}",
+        f"Páginas sem texto incorporado: {pages_without_text}",
+        f"Partes geradas: {part_count}",
+        "Formato: MARKDOWN",
+        "",
+        "COMO USAR",
+        "Envie os arquivos da pasta PRONTO_PARA_IA em ordem numérica.",
+        "Os marcadores LIMEBH_PAGE_START e LIMEBH_PAGE_END preservam a página de origem.",
+        "",
+        "O QUE ESTÁ INCLUÍDO",
+        "Texto incorporado, metadados, sumário e catálogos de imagens e arquivos internos.",
+        "",
+        "O QUE NÃO ESTÁ INCLUÍDO",
+        (
+            f"Binários de {embedded_file_count} arquivo(s) incorporado(s) e "
+            f"{image_count} imagem(ns) catalogada(s)."
+        ),
+        "OCR não é aplicado nesta etapa; páginas digitalizadas podem permanecer sem texto.",
+        "",
+        "PRIVACIDADE",
+        (
+            "A saída pode conter dados pessoais. Compartilhe apenas com pessoas "
+            "e serviços autorizados."
+        ),
+    ]
+    path = output_dir / "LEIA-ME.txt"
+    atomic_write_text(path, "\n".join(lines) + "\n")
+    return path
