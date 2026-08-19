@@ -636,13 +636,10 @@ Limites atuais conhecidos:
 - Implementar XLSX com abas, tipos e tabelas.
 - Gerar JSON ou JSONL conforme perfil.
 
-### Fase 5 — Privacidade e conteúdo avançado — próxima
+### Fase 5 — Privacidade — próxima
 
 - Detectar possíveis dados pessoais.
 - Oferecer anonimização opcional.
-- Criar `body_analysis` conservador para e-mails.
-- Avaliar extração de anexos.
-- Avaliar OCR de imagens e PDFs digitalizados.
 
 ### Fase 6 — Distribuição
 
@@ -652,6 +649,12 @@ Limites atuais conhecidos:
 - Testar em máquina sem Python.
 - Criar manual curto para usuários.
 - Definir versão, atualização e suporte.
+
+### Evoluções futuras — fora do escopo atual
+
+- Avaliar `body_analysis` conservador para e-mails.
+- Avaliar extração do conteúdo de anexos.
+- Avaliar OCR de imagens e PDFs digitalizados.
 
 ## 22. Critérios de aceite do MVP
 
@@ -708,6 +711,8 @@ O MVP será considerado pronto quando:
 - Documentos narrativos priorizarão Markdown.
 - O aplicativo não enviará dados automaticamente a serviços externos.
 - A primeira interface será desktop, não Streamlit.
+- `body_analysis`, extração de anexos e OCR ficam adiados para uma possível
+  evolução futura e não fazem parte da Fase 5.
 
 ## 26. Questões em aberto
 
@@ -717,16 +722,14 @@ Estas decisões serão tomadas durante as fases correspondentes:
 - Formatos e plataformas exatas suportadas por cada perfil de destino.
 - Dependências para PDF, DOCX e XLSX.
 - Estratégia de tokenização exata ou conservadora por modelo.
-- Política de extração de anexos de e-mail.
-- Limites e qualidade aceitável para OCR.
 - Nível padrão de detecção ou anonimização de dados pessoais.
 - Formato de atualização e distribuição do executável.
 - Necessidade de assinatura digital do aplicativo Windows.
 
 ## 27. Próximo incremento
 
-O próximo incremento será o planejamento da Fase 5. Antes de codificar, o escopo
-será dividido em entregas pequenas, começando pela detecção auditável de possíveis
-dados pessoais e sua apresentação no relatório. Anonimização, `body_analysis`,
-extração de anexos e OCR serão avaliados separadamente, sempre preservando o
-conteúdo original e o processamento local por padrão.
+O próximo incremento será o planejamento da Fase 5, agora restrita à privacidade.
+Antes de codificar, o escopo será dividido em entregas pequenas, começando pela
+detecção auditável de possíveis dados pessoais e sua apresentação no relatório.
+A anonimização opcional será tratada em incremento posterior da mesma fase.
+`body_analysis`, extração de anexos e OCR ficam fora do escopo atual.

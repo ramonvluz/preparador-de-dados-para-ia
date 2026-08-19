@@ -12,7 +12,7 @@
 | 2 | Interface desktop, Downloads, progresso, cancelamento e resultados | Concluída |
 | 3 | TXT, Markdown, PDF e DOCX | Concluída |
 | 4 | Contratos tabulares, CSV e XLSX | Concluída |
-| 5 | Privacidade e conteúdo avançado | Próxima |
+| 5 | Detecção e anonimização opcional de dados pessoais | Próxima |
 | 6 | Empacotamento, identidade visual e distribuição Windows | Planejada |
 
 ## Validações atuais
@@ -35,11 +35,19 @@
 ## Limites conhecidos
 
 - Uma fonte por conversão na interface.
-- Sem anonimização, OCR ou extração do conteúdo de anexos.
+- Sem detecção ou anonimização de dados pessoais nesta versão.
 - XLSX sem suporte a `.xls`; fórmulas não são executadas.
 - Células fora de tabelas do Excel não são incluídas quando a aba contém tabelas.
 - Planilhas XLSX muito grandes ainda exigem teste específico de memória.
 - Refinamento visual e empacotamento Windows pertencem à Fase 6.
+
+## Evoluções futuras adiadas
+
+- `body_analysis` conservador para e-mails.
+- Extração do conteúdo de anexos.
+- OCR de imagens e PDFs digitalizados.
+
+Esses itens não fazem parte da Fase 5 nem do escopo imediato do produto.
 
 ## Próximo passo recomendado
 
