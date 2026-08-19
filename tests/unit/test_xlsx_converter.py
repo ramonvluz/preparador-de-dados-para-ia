@@ -7,11 +7,11 @@ from jsonschema import Draft202012Validator
 from openpyxl import Workbook
 from openpyxl.worksheet.table import Table, TableStyleInfo
 
-from limebh_preparador.converters.base import ConversionContext
-from limebh_preparador.converters.xlsx import XlsxWorkbookConverter
-from limebh_preparador.converters.xlsx.extractor import InvalidXlsxError
-from limebh_preparador.core.cancellation import CancellationToken
-from limebh_preparador.core.cleaning import UnicodeSanitizer
+from preparador_dados_ia.converters.base import ConversionContext
+from preparador_dados_ia.converters.xlsx import XlsxWorkbookConverter
+from preparador_dados_ia.converters.xlsx.extractor import InvalidXlsxError
+from preparador_dados_ia.core.cancellation import CancellationToken
+from preparador_dados_ia.core.cleaning import UnicodeSanitizer
 
 PROJECT_ROOT = Path(__file__).parents[2]
 SCHEMA = json.loads(

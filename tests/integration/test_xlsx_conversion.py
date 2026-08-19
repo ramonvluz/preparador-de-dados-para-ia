@@ -5,8 +5,8 @@ from pathlib import Path
 from openpyxl import Workbook
 from openpyxl.worksheet.table import Table
 
-from limebh_preparador.application.conversion import ConversionSettings, DestinationProfile
-from limebh_preparador.application.service import convert_source
+from preparador_dados_ia.application.conversion import ConversionSettings, DestinationProfile
+from preparador_dados_ia.application.service import convert_source
 
 
 def _source(path: Path) -> None:

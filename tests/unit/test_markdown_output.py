@@ -1,10 +1,10 @@
 from datetime import UTC, datetime
 from pathlib import Path
 
-from limebh_preparador.contracts.text import TextHeading, build_text_document_record
-from limebh_preparador.core.cancellation import CancellationToken
-from limebh_preparador.core.partitioning import PartitionLimits
-from limebh_preparador.outputs.markdown import MarkdownDocumentWriter
+from preparador_dados_ia.contracts.text import TextHeading, build_text_document_record
+from preparador_dados_ia.core.cancellation import CancellationToken
+from preparador_dados_ia.core.partitioning import PartitionLimits
+from preparador_dados_ia.outputs.markdown import MarkdownDocumentWriter
 
 CONVERTED_AT = datetime(2026, 8, 6, 9, 30, tzinfo=UTC)
 

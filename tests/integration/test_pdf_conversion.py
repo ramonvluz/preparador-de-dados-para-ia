@@ -3,7 +3,7 @@ from pathlib import Path
 
 from pypdf import PdfWriter
 
-from limebh_preparador.application.service import convert_source
+from preparador_dados_ia.application.service import convert_source
 
 PROJECT_ROOT = Path(__file__).parents[2]
 FIXTURE = PROJECT_ROOT / "tests" / "fixtures" / "artificial_document.pdf"
@@ -45,8 +45,8 @@ def test_pdf_conversion_generates_page_marked_markdown_and_audit_report(
     assert ready_files
     ready_text = "\n".join(path.read_text(encoding="utf-8") for path in ready_files)
     assert "Relatorio Artificial da Fase 3C" in ready_text
-    assert "<!-- LIMEBH_PAGE_START page=1 -->" in ready_text
-    assert "<!-- LIMEBH_PAGE_START page=3 -->" in ready_text
+    assert "<!-- PREPARADOR_PAGE_START page=1 -->" in ready_text
+    assert "<!-- PREPARADOR_PAGE_START page=3 -->" in ready_text
     assert "notas_artificiais.txt" in ready_text
     assert str(FIXTURE.resolve()) not in ready_text
     assert (output / "LEIA-ME.txt").is_file()

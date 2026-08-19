@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://limebh.local/schemas/text_document-1.0.json",
-  "title": "LIMEBH Text Document",
+  "$id": "https://preparador-dados.local/schemas/text_document-1.0.json",
+  "title": "Preparador Text Document",
   "type": "object",
   "required": ["schema_version", "record_type", "record_id", "source", "data", "processing"],
   "properties": {

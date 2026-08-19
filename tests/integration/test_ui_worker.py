@@ -3,8 +3,8 @@ from queue import Empty
 
 from openpyxl import Workbook
 
-from limebh_preparador.ui.state import DesktopConversionRequest, UiProfile
-from limebh_preparador.ui.worker import (
+from preparador_dados_ia.ui.state import DesktopConversionRequest, UiProfile
+from preparador_dados_ia.ui.worker import (
     ConversionWorker,
     WorkerEvent,
     WorkerFinished,

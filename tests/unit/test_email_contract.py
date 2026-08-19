@@ -6,7 +6,7 @@ from pathlib import Path
 
 from jsonschema import Draft202012Validator
 
-from limebh_preparador.converters.email import message_to_record
+from preparador_dados_ia.converters.email import message_to_record
 
 PROJECT_ROOT = Path(__file__).parents[2]
 FIXTURE = PROJECT_ROOT / "tests" / "fixtures" / "artificial_emails.mbox"

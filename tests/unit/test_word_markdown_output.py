@@ -1,16 +1,16 @@
 from datetime import UTC, datetime
 from pathlib import Path
 
-from limebh_preparador.contracts.word import (
+from preparador_dados_ia.contracts.word import (
     WordHeading,
     WordListItem,
     WordParagraph,
     WordTable,
     build_word_document_record,
 )
-from limebh_preparador.core.cancellation import CancellationToken
-from limebh_preparador.core.partitioning import PartitionLimits
-from limebh_preparador.outputs.word_markdown import WordMarkdownWriter
+from preparador_dados_ia.core.cancellation import CancellationToken
+from preparador_dados_ia.core.partitioning import PartitionLimits
+from preparador_dados_ia.outputs.word_markdown import WordMarkdownWriter
 
 CONVERTED_AT = datetime(2026, 8, 6, 16, 0, tzinfo=UTC)
 
@@ -20,7 +20,7 @@ def _record(*blocks: object) -> dict[str, object]:
         source_file="guia.docx",
         source_size_bytes=4096,
         title="Guia artificial",
-        author="LIMEBH",
+        author="Projeto Artificial",
         blocks=blocks,
         converted_at=CONVERTED_AT,
     )
@@ -46,8 +46,8 @@ def test_word_markdown_preserves_headings_lists_tables_and_block_references(
     output = (tmp_path / writer.parts[0].file).read_text(encoding="utf-8")
     assert segments == 1
     assert oversized is False
-    assert "<!-- LIMEBH_WORD_CATALOG -->" in output
-    assert "<!-- LIMEBH_WORD_BLOCK_START start=0 end=0 -->" in output
+    assert "<!-- PREPARADOR_WORD_CATALOG -->" in output
+    assert "<!-- PREPARADOR_WORD_BLOCK_START start=0 end=0 -->" in output
     assert "# Orientações" in output
     assert "- Item principal\n    - Subitem" in output
     assert "| Risco | Mitigação |" in output
@@ -69,6 +69,6 @@ def test_large_word_paragraph_is_segmented_into_bounded_parts(tmp_path: Path) ->
         path = tmp_path / part.file
         output = path.read_text(encoding="utf-8")
         assert path.stat().st_size <= limits.max_bytes
-        if "LIMEBH_WORD_BLOCK_START" in output:
+        if "PREPARADOR_WORD_BLOCK_START" in output:
             assert "segment=" in output
-            assert "LIMEBH_WORD_BLOCK_END" in output
+            assert "PREPARADOR_WORD_BLOCK_END" in output

@@ -1,9 +1,9 @@
-# Preparador de Dados para IA da LIMEBH
+# Preparador de Dados para IA
 
 Aplicação local para converter, limpar, estruturar e particionar arquivos
 administrativos antes do uso em plataformas de IA ou integrações via API.
 
-**Status atual:** Fases 1 a 4 concluídas; Fase 5 aguardando planejamento.
+**Status atual:** MVP funcional; revisão manual final antes do empacotamento Windows.
 
 Este repositório contém a nova base modular do produto. A base atual implementa
 a conversão incremental de MBOX, o contrato versionado `email_message`, limpeza
@@ -44,10 +44,10 @@ No PowerShell, a partir da raiz do projeto:
 ## Uso da CLI
 
 ```powershell
-.\.venv\Scripts\limebh-preparador.exe "C:\caminho\emails.mbox"
+.\.venv\Scripts\preparador-dados.exe "C:\caminho\emails.mbox"
 ```
 
-Por padrão, o resultado é criado em `Downloads\Preparador LIMEBH`, com uma
+Por padrão, o resultado é criado em `Downloads\Preparador de Dados para IA`, com uma
 pasta exclusiva para a conversão. Para MBOX, o perfil `platform` gera JSON
 particionado e o perfil `api` gera JSONL. TXT e Markdown geram Markdown
 particionado nos dois perfis. PDF gera Markdown com marcadores explícitos de
@@ -55,15 +55,15 @@ página e DOCX gera Markdown estruturado, conforme a recomendação automática 
 PRD. CSV e XLSX geram JSON tabular no perfil `platform` e JSONL no perfil `api`.
 
 ```powershell
-.\.venv\Scripts\limebh-preparador.exe emails.mbox --profile api
-.\.venv\Scripts\limebh-preparador.exe manual.txt
-.\.venv\Scripts\limebh-preparador.exe orientacoes.md --profile api
-.\.venv\Scripts\limebh-preparador.exe relatorio.pdf
-.\.venv\Scripts\limebh-preparador.exe manual.docx
-.\.venv\Scripts\limebh-preparador.exe dados.csv --profile api
-.\.venv\Scripts\limebh-preparador.exe planejamento.xlsx
-.\.venv\Scripts\limebh-preparador.exe emails.mbox --output C:\saida\conversao
-.\.venv\Scripts\limebh-preparador.exe emails.mbox --max-size-mb 25 --max-tokens 250000
+.\.venv\Scripts\preparador-dados.exe emails.mbox --profile api
+.\.venv\Scripts\preparador-dados.exe manual.txt
+.\.venv\Scripts\preparador-dados.exe orientacoes.md --profile api
+.\.venv\Scripts\preparador-dados.exe relatorio.pdf
+.\.venv\Scripts\preparador-dados.exe manual.docx
+.\.venv\Scripts\preparador-dados.exe dados.csv --profile api
+.\.venv\Scripts\preparador-dados.exe planejamento.xlsx
+.\.venv\Scripts\preparador-dados.exe emails.mbox --output C:\saida\conversao
+.\.venv\Scripts\preparador-dados.exe emails.mbox --max-size-mb 25 --max-tokens 250000
 ```
 
 Use `--help` para consultar todas as opções. Limites são configuráveis e não
@@ -74,18 +74,19 @@ representam garantias permanentes de plataformas externas.
 Inicie a aplicação gráfica pelo executável instalado no ambiente virtual:
 
 ```powershell
-.\.venv\Scripts\limebh-preparador-gui.exe
+.\.venv\Scripts\preparador-dados-gui.exe
 ```
 
 Também é possível executar diretamente como módulo:
 
 ```powershell
-.\.venv\Scripts\python.exe -m limebh_preparador.ui
+.\.venv\Scripts\python.exe -m preparador_dados_ia.ui
 ```
 
-A interface seleciona MBOX, TXT, Markdown, PDF, DOCX, CSV ou XLSX e apresenta a saída
-recomendada para cada combinação de fonte e perfil. Ela utiliza `Downloads\Preparador
-LIMEBH` por padrão e executa a conversão em uma thread separada. O cancelamento
+A interface seleciona MBOX, TXT, Markdown, PDF, DOCX, CSV ou XLSX e apresenta a
+saída recomendada para cada combinação de fonte e perfil. Ela utiliza
+`Downloads\Preparador de Dados para IA` por padrão e executa a conversão em uma
+thread separada. O cancelamento
 preserva partes concluídas e válidas.
 
 ## Verificação
@@ -100,6 +101,7 @@ fixtures em `tests/fixtures` são artificiais e usam domínios reservados.
 ## Documentação
 
 - [Status atual do projeto](docs/STATUS_PROJETO.md)
+- [Arquitetura](docs/ARQUITETURA.md)
 - [PRD](docs/PRD.md)
 - [Validação de equivalência](docs/VALIDACAO_EQUIVALENCIA.md)
 - [Validação da Fase 2 — MVP desktop](docs/VALIDACAO_FASE_2.md)

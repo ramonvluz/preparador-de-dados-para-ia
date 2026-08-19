@@ -3,10 +3,10 @@ from pathlib import Path
 
 import pytest
 
-from limebh_preparador.application.conversion import ConversionSettings, DestinationProfile
-from limebh_preparador.application.progress import ConversionProgress
-from limebh_preparador.application.service import convert_source
-from limebh_preparador.core.cancellation import CancellationToken
+from preparador_dados_ia.application.conversion import ConversionSettings, DestinationProfile
+from preparador_dados_ia.application.progress import ConversionProgress
+from preparador_dados_ia.application.service import convert_source
+from preparador_dados_ia.core.cancellation import CancellationToken
 
 
 def _sha256(path: Path) -> str:

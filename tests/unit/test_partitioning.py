@@ -4,13 +4,13 @@ from pathlib import Path
 
 import pytest
 
-from limebh_preparador.contracts.email import build_email_record
-from limebh_preparador.core.partitioning import (
+from preparador_dados_ia.contracts.email import build_email_record
+from preparador_dados_ia.core.partitioning import (
     PartitionLimits,
     record_metrics,
     split_oversized_record,
 )
-from limebh_preparador.outputs.parts import OutputFormat, PartWriter
+from preparador_dados_ia.outputs.parts import OutputFormat, PartWriter
 
 
 def _record(body: str, message_id: str = "<artificial@example.invalid>") -> dict[str, object]:

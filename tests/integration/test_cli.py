@@ -2,7 +2,7 @@ from pathlib import Path
 
 from openpyxl import Workbook
 
-from limebh_preparador.cli import main
+from preparador_dados_ia.cli import main
 
 PROJECT_ROOT = Path(__file__).parents[2]
 FIXTURE = PROJECT_ROOT / "tests" / "fixtures" / "artificial_emails.mbox"

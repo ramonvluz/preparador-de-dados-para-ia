@@ -1,20 +1,20 @@
-# PRD — Preparador de Dados para IA da LIMEBH
+# PRD — Preparador de Dados para IA
 
 ## 1. Identificação
 
-- **Produto:** Preparador de Dados para IA da LIMEBH
+- **Produto:** Preparador de Dados para IA
 - **Tipo de documento:** Documento de Requisitos do Produto (PRD)
-- **Versão:** 0.2
-- **Status:** Fases 1 a 4 concluídas; Fase 5 aguardando planejamento
-- **Responsável inicial:** Coordenação de Tecnologia da LIMEBH
+- **Versão:** 0.3
+- **Status:** MVP funcional; revisão manual final antes da distribuição Windows
+- **Responsável:** Autor do projeto
 - **Plataforma inicial:** Windows desktop
 
 ## 2. Visão do produto
 
-O Preparador de Dados para IA da LIMEBH será uma aplicação desktop local que
-transforma arquivos administrativos em documentos limpos, estruturados e
-particionados para uso em plataformas de inteligência artificial ou integrações
-via API.
+O Preparador de Dados para IA é uma aplicação desktop local que transforma
+arquivos que plataformas de IA não leem diretamente, ou que excedem seus limites,
+em documentos limpos, estruturados e, quando necessário, particionados para uso
+em plataformas de inteligência artificial ou integrações via API.
 
 O produto não será um sistema de armazenamento ou gestão documental. Sua função
 é preparar dados existentes para uso por modelos de linguagem, permitindo que
@@ -28,9 +28,10 @@ pessoas sem conhecimento técnico executem conversões com segurança e autonomi
 
 ## 3. Problema
 
-A LIMEBH possui informações importantes distribuídas em e-mails, documentos,
-PDFs, planilhas e arquivos de texto. Esses arquivos podem ser grandes, conter
-ruído técnico ou usar estruturas pouco adequadas a plataformas de IA.
+Profissionais e organizações possuem informações distribuídas em e-mails,
+documentos, PDFs, planilhas e arquivos de texto. Esses arquivos podem não ser
+aceitos diretamente por plataformas de IA, ser grandes demais, conter ruído
+técnico ou usar estruturas pouco adequadas à análise por modelos de linguagem.
 
 Atualmente, a preparação exige intervenção de uma pessoa com conhecimento
 técnico para:
@@ -47,8 +48,8 @@ técnico para:
 
 ### 4.1 Objetivo principal
 
-Dar autonomia aos integrantes autorizados da LIMEBH para preparar documentos
-para análise por LLMs de forma local, simples, rastreável e segura.
+Permitir que uma pessoa prepare arquivos para análise por LLMs de forma local,
+simples, rastreável e segura, sem depender de scripts ou conversões manuais.
 
 ### 4.2 Objetivos específicos
 
@@ -80,13 +81,13 @@ A primeira versão não pretende:
 
 ### 6.1 Usuário principal
 
-Integrante da LIMEBH que precisa preparar dados para análise em uma plataforma de
-IA, mas não deseja usar scripts ou terminal.
+Pessoa que precisa preparar dados para análise em uma plataforma de IA, mas não
+deseja usar scripts ou terminal.
 
 ### 6.2 Usuário técnico
 
-Integrante da Coordenação de Tecnologia responsável por validar conversões,
-investigar avisos, configurar opções avançadas e evoluir os conversores.
+Pessoa responsável por validar conversões, investigar avisos, configurar opções
+avançadas e evoluir os conversores.
 
 ## 7. Princípios do produto
 
@@ -150,7 +151,7 @@ não devem passar por um mecanismo de upload de aplicação web local.
 ### 9.3 Wireframe textual
 
 ```text
-Preparador de Dados para IA — LIMEBH
+Preparador de Dados para IA
 
 Arquivos selecionados
 ┌──────────────────────────────────────────────────────────────┐
@@ -161,7 +162,7 @@ Arquivos selecionados
 
 Destino de uso:    [ Plataforma de IA ▼ ]
 Formato de saída:  [ Automático (recomendado) ▼ ]
-Destino local:     [ Downloads\Preparador LIMEBH ] [ Alterar ]
+Destino local:     [ Downloads\Preparador de Dados para IA ] [ Alterar ]
 
 [x] Limpar caracteres invisíveis
 [x] Gerar relatório
@@ -183,7 +184,7 @@ No Windows, deverá consultar a pasta conhecida do sistema e usar
 
 ```text
 Downloads/
-└── Preparador LIMEBH/
+└── Preparador de Dados para IA/
 ```
 
 ### 10.2 Pasta por conversão
@@ -636,16 +637,16 @@ Limites atuais conhecidos:
 - Implementar XLSX com abas, tipos e tabelas.
 - Gerar JSON ou JSONL conforme perfil.
 
-### Fase 5 — Privacidade — próxima
+### Fase 5 — Privacidade — evolução futura
 
 - Detectar possíveis dados pessoais.
 - Oferecer anonimização opcional.
 
-### Fase 6 — Distribuição
+### Fase 6 — Distribuição — próxima
 
 - Criar executável Windows.
 - Avaliar versão portátil e instalador.
-- Adicionar identidade visual da LIMEBH.
+- Adicionar identidade visual do produto.
 - Testar em máquina sem Python.
 - Criar manual curto para usuários.
 - Definir versão, atualização e suporte.
@@ -687,7 +688,7 @@ O MVP será considerado pronto quando:
 
 | Risco | Mitigação |
 |---|---|
-| Exposição de dados pessoais | Processamento local, alertas e anonimização opcional |
+| Exposição de dados pessoais | Processamento local, alerta visível e recursos futuros de privacidade |
 | Perda semântica durante limpeza | Preservar texto integral e registrar transformações |
 | Arquivos maiores que a memória | Streaming e escrita incremental |
 | Limites externos mudarem | Perfis configuráveis e versionados |
@@ -713,23 +714,24 @@ O MVP será considerado pronto quando:
 - A primeira interface será desktop, não Streamlit.
 - `body_analysis`, extração de anexos e OCR ficam adiados para uma possível
   evolução futura e não fazem parte da Fase 5.
+- Detecção e anonimização de dados pessoais também ficam adiadas; não são
+  necessárias para o MVP de usuário único.
+- O nome público independente é `Preparador de Dados para IA`.
 
 ## 26. Questões em aberto
 
 Estas decisões serão tomadas durante as fases correspondentes:
 
-- Nome público definitivo e identidade visual do aplicativo.
+- Identidade visual definitiva do aplicativo.
 - Formatos e plataformas exatas suportadas por cada perfil de destino.
 - Dependências para PDF, DOCX e XLSX.
 - Estratégia de tokenização exata ou conservadora por modelo.
-- Nível padrão de detecção ou anonimização de dados pessoais.
 - Formato de atualização e distribuição do executável.
 - Necessidade de assinatura digital do aplicativo Windows.
 
 ## 27. Próximo incremento
 
-O próximo incremento será o planejamento da Fase 5, agora restrita à privacidade.
-Antes de codificar, o escopo será dividido em entregas pequenas, começando pela
-detecção auditável de possíveis dados pessoais e sua apresentação no relatório.
-A anonimização opcional será tratada em incremento posterior da mesma fase.
-`body_analysis`, extração de anexos e OCR ficam fora do escopo atual.
+O próximo incremento será uma rodada manual de regressão com novos arquivos de
+cada formato suportado. Após a aprovação dessa rodada, começa a Fase 6 com a
+criação do executável Windows, teste em máquina sem Python e preparação de um
+manual curto. Privacidade, `body_analysis`, anexos e OCR ficam fora do MVP atual.

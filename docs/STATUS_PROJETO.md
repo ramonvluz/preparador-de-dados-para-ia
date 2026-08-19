@@ -2,7 +2,7 @@
 
 **Atualizado em:** 19 de agosto de 2026  
 **Versão do aplicativo:** 0.1.0  
-**Situação:** Fases 1 a 4 concluídas; Fase 5 ainda não iniciada
+**Situação:** MVP funcional; revisão manual final antes do empacotamento Windows
 
 ## Entregas concluídas
 
@@ -12,8 +12,8 @@
 | 2 | Interface desktop, Downloads, progresso, cancelamento e resultados | Concluída |
 | 3 | TXT, Markdown, PDF e DOCX | Concluída |
 | 4 | Contratos tabulares, CSV e XLSX | Concluída |
-| 5 | Detecção e anonimização opcional de dados pessoais | Próxima |
-| 6 | Empacotamento, identidade visual e distribuição Windows | Planejada |
+| 5 | Privacidade e conteúdo avançado | Adiada |
+| 6 | Empacotamento, identidade visual e distribuição Windows | Próxima |
 
 ## Validações atuais
 
@@ -35,7 +35,7 @@
 ## Limites conhecidos
 
 - Uma fonte por conversão na interface.
-- Sem detecção ou anonimização de dados pessoais nesta versão.
+- Sem detecção ou anonimização de dados pessoais nesta versão; recurso adiado.
 - XLSX sem suporte a `.xls`; fórmulas não são executadas.
 - Células fora de tabelas do Excel não são incluídas quando a aba contém tabelas.
 - Planilhas XLSX muito grandes ainda exigem teste específico de memória.
@@ -46,11 +46,11 @@
 - `body_analysis` conservador para e-mails.
 - Extração do conteúdo de anexos.
 - OCR de imagens e PDFs digitalizados.
+- Detecção e anonimização opcional de dados pessoais.
 
-Esses itens não fazem parte da Fase 5 nem do escopo imediato do produto.
+Esses itens não fazem parte do MVP nem do escopo imediato do produto.
 
 ## Próximo passo recomendado
 
-Planejar a Fase 5 antes de implementar. O primeiro incremento recomendado é a
-detecção local e auditável de possíveis dados pessoais, apenas para contagem e
-aviso no relatório, sem anonimização automática nesta primeira entrega.
+Executar uma rodada manual de regressão com novos arquivos MBOX, TXT, Markdown,
+PDF, DOCX, CSV e XLSX. Depois da aprovação, criar e testar o executável Windows.

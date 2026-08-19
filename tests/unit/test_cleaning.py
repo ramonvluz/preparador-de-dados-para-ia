@@ -1,4 +1,4 @@
-from limebh_preparador.core.cleaning import UnicodeSanitizer, html_to_text, sanitize_record
+from preparador_dados_ia.core.cleaning import UnicodeSanitizer, html_to_text, sanitize_record
 
 
 def test_unicode_cleanup_preserves_valid_content() -> None:

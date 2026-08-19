@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://limebh.local/schemas/word_document-1.0.json",
-  "title": "LIMEBH Word Document",
+  "$id": "https://preparador-dados.local/schemas/word_document-1.0.json",
+  "title": "Preparador Word Document",
   "type": "object",
   "required": ["schema_version", "record_type", "record_id", "source", "data", "processing"],
   "properties": {

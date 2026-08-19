@@ -5,13 +5,13 @@ from pathlib import Path
 import pytest
 from jsonschema import Draft202012Validator
 
-from limebh_preparador.application.conversion import (
+from preparador_dados_ia.application.conversion import (
     ConversionSettings,
     DestinationProfile,
     convert_mbox,
 )
-from limebh_preparador.application.progress import ConversionProgress
-from limebh_preparador.core.cancellation import CancellationToken
+from preparador_dados_ia.application.progress import ConversionProgress
+from preparador_dados_ia.core.cancellation import CancellationToken
 
 PROJECT_ROOT = Path(__file__).parents[2]
 FIXTURE = PROJECT_ROOT / "tests" / "fixtures" / "artificial_emails.mbox"

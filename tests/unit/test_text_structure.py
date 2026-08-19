@@ -1,4 +1,4 @@
-from limebh_preparador.converters.text.structure import analyze_text_structure
+from preparador_dados_ia.converters.text.structure import analyze_text_structure
 
 
 def test_markdown_structure_uses_parser_and_ignores_fenced_code() -> None:

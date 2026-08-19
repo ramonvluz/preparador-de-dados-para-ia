@@ -2,8 +2,8 @@ import hashlib
 import json
 from pathlib import Path
 
-from limebh_preparador.application.conversion import ConversionSettings, DestinationProfile
-from limebh_preparador.application.service import convert_source
+from preparador_dados_ia.application.conversion import ConversionSettings, DestinationProfile
+from preparador_dados_ia.application.service import convert_source
 
 
 def _sha256(path: Path) -> str:

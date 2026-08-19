@@ -5,9 +5,9 @@ from pathlib import Path
 
 from jsonschema import Draft202012Validator
 
-from limebh_preparador.converters.base import ConversionContext
-from limebh_preparador.converters.text import TextDocumentConverter
-from limebh_preparador.core.cancellation import CancellationToken
+from preparador_dados_ia.converters.base import ConversionContext
+from preparador_dados_ia.converters.text import TextDocumentConverter
+from preparador_dados_ia.core.cancellation import CancellationToken
 
 PROJECT_ROOT = Path(__file__).parents[2]
 SCHEMA = PROJECT_ROOT / "schemas" / "text_document.schema.json"

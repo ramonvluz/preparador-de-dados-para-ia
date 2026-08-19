@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 from jsonschema import Draft202012Validator
 
-from limebh_preparador.contracts.tabular import (
+from preparador_dados_ia.contracts.tabular import (
     CsvDialect,
     SpreadsheetFormula,
     SpreadsheetSheet,

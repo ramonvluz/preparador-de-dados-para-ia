@@ -3,14 +3,11 @@ requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "limebh-preparador-ia"
+name = "preparador-dados-ia"
 version = "0.1.0"
-description = "Preparador local de dados administrativos da LIMEBH para uso com IA."
+description = "Converte e particiona arquivos locais para uso em plataformas de IA."
 readme = "README.md"
 requires-python = ">=3.11"
-authors = [
-  { name = "Coordenação de Tecnologia da LIMEBH" },
-]
 dependencies = [
   "charset-normalizer>=3.4,<4",
   "markdown-it-py>=4.2,<5",
@@ -28,8 +25,8 @@ dev = [
 ]
 
 [project.scripts]
-limebh-preparador = "limebh_preparador.cli:main"
-limebh-preparador-gui = "limebh_preparador.ui.app:main"
+preparador-dados = "preparador_dados_ia.cli:main"
+preparador-dados-gui = "preparador_dados_ia.ui.app:main"
 
 [tool.setuptools]
 package-dir = { "" = "src" }

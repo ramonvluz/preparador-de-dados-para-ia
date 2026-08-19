@@ -28,8 +28,8 @@ deslocada para o fim da saída.
 Cada parte Markdown começa com metadados locais e utiliza os marcadores:
 
 ```text
-<!-- LIMEBH_WORD_BLOCK_START start=N end=M -->
-<!-- LIMEBH_WORD_BLOCK_END start=N end=M -->
+<!-- PREPARADOR_WORD_BLOCK_START start=N end=M -->
+<!-- PREPARADOR_WORD_BLOCK_END start=N end=M -->
 ```
 
 Títulos usam níveis Markdown de 1 a 6. Listas consecutivas permanecem agrupadas

@@ -5,9 +5,9 @@ from docx import Document
 from docx.oxml.ns import qn
 from docx.shared import Pt
 
-from limebh_preparador.application.progress import ConversionProgress
-from limebh_preparador.application.service import convert_source
-from limebh_preparador.core.cancellation import CancellationToken
+from preparador_dados_ia.application.progress import ConversionProgress
+from preparador_dados_ia.application.service import convert_source
+from preparador_dados_ia.core.cancellation import CancellationToken
 
 PROJECT_ROOT = Path(__file__).parents[2]
 FIXTURE = PROJECT_ROOT / "tests" / "fixtures" / "artificial_document.docx"

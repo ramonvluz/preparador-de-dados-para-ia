@@ -38,7 +38,7 @@ def _draw_header(pdf: canvas.Canvas, section: str) -> None:
     pdf.rect(0, HEIGHT - 56, WIDTH, 56, stroke=0, fill=1)
     pdf.setFillColor(colors.white)
     pdf.setFont("Helvetica-Bold", 10)
-    pdf.drawString(42, HEIGHT - 35, "LIMEBH - DOCUMENTO ARTIFICIAL")
+    pdf.drawString(42, HEIGHT - 35, "PREPARADOR - DOCUMENTO ARTIFICIAL")
     pdf.drawRightString(WIDTH - 42, HEIGHT - 35, section)
 
 
@@ -46,7 +46,7 @@ def _base_pdf() -> bytes:
     buffer = BytesIO()
     pdf = canvas.Canvas(buffer, pagesize=A4, pageCompression=1, invariant=1)
     pdf.setTitle("Relatorio Artificial da Fase 3C")
-    pdf.setAuthor("LIMEBH")
+    pdf.setAuthor("Projeto Artificial")
     pdf.setSubject("Fixture artificial para validacao local de PDF")
 
     pdf.bookmarkPage("visao_geral")

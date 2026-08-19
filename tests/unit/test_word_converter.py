@@ -8,12 +8,12 @@ from docx.oxml.ns import qn
 from docx.shared import Pt
 from jsonschema import Draft202012Validator
 
-from limebh_preparador.application.progress import ConversionProgress
-from limebh_preparador.contracts.word import WordParagraph
-from limebh_preparador.converters.base import ConversionContext
-from limebh_preparador.converters.word import WordDocumentConverter
-from limebh_preparador.converters.word.extractor import suspicious_text_sequence_count
-from limebh_preparador.core.cancellation import CancellationToken
+from preparador_dados_ia.application.progress import ConversionProgress
+from preparador_dados_ia.contracts.word import WordParagraph
+from preparador_dados_ia.converters.base import ConversionContext
+from preparador_dados_ia.converters.word import WordDocumentConverter
+from preparador_dados_ia.converters.word.extractor import suspicious_text_sequence_count
+from preparador_dados_ia.core.cancellation import CancellationToken
 
 PROJECT_ROOT = Path(__file__).parents[2]
 FIXTURE = PROJECT_ROOT / "tests" / "fixtures" / "artificial_document.docx"
@@ -51,7 +51,7 @@ def test_word_converter_extracts_ordered_valid_contract_without_changing_source(
     Draft202012Validator(json.loads(SCHEMA.read_text(encoding="utf-8"))).validate(record)
     assert record["source"]["file_name"] == "artificial_document.docx"
     assert record["data"]["title"] == "Guia Artificial de Validação 3D"
-    assert record["data"]["author"] == "LIMEBH"
+    assert record["data"]["author"] == "Projeto Artificial"
     assert len(record["data"]["blocks"]) == 18
     assert [block["type"] for block in record["data"]["blocks"]][3:7] == [
         "heading",

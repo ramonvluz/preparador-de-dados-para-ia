@@ -40,7 +40,7 @@ integralmente artificial:
 
 Em 5 de agosto de 2026, a nova CLI processou a fonte real diretamente no local
 original, sem movê-la ou copiá-la. A saída foi criada pelo comportamento padrão
-do produto em `Downloads\Preparador LIMEBH`, fora do repositório.
+do produto em `Downloads\Preparador de Dados para IA`, fora do repositório.
 
 | Verificação | Resultado da nova base |
 |---|---:|

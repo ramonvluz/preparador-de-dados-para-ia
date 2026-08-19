@@ -2,8 +2,8 @@ from pathlib import Path
 
 import pytest
 
-from limebh_preparador.converters.text.reader import decode_text_bytes, read_text_source
-from limebh_preparador.core.cancellation import CancellationToken, ConversionCancelled
+from preparador_dados_ia.converters.text.reader import decode_text_bytes, read_text_source
+from preparador_dados_ia.core.cancellation import CancellationToken, ConversionCancelled
 
 
 def test_utf8_bom_is_removed_without_warning() -> None:

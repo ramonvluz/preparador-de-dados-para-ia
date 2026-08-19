@@ -75,7 +75,11 @@ def _configure_section(section: object) -> None:
     header = section.header.paragraphs[0]
     header.alignment = WD_ALIGN_PARAGRAPH.RIGHT
     header.paragraph_format.space_after = Pt(0)
-    _set_font(header.add_run("LIMEBH | FIXTURE DOCX 3D"), size=8, color=RGBColor(0x61, 0x73, 0x6F))
+    _set_font(
+        header.add_run("PREPARADOR | FIXTURE DOCX 3D"),
+        size=8,
+        color=RGBColor(0x61, 0x73, 0x6F),
+    )
     footer = section.footer.paragraphs[0]
     footer.alignment = WD_ALIGN_PARAGRAPH.CENTER
     footer.paragraph_format.space_after = Pt(0)
@@ -168,11 +172,11 @@ def _repack_deterministically(source: bytes, output: Path) -> None:
 def create_fixture(output: Path = OUTPUT) -> Path:
     document = Document()
     document.core_properties.title = "Guia Artificial de Validação 3D"
-    document.core_properties.author = "LIMEBH"
+    document.core_properties.author = "Projeto Artificial"
     document.core_properties.subject = "Fixture DOCX artificial"
     document.core_properties.created = FIXED_TIME
     document.core_properties.modified = FIXED_TIME
-    document.core_properties.last_modified_by = "LIMEBH"
+    document.core_properties.last_modified_by = "Projeto Artificial"
     _configure_styles(document)
     _configure_section(document.sections[0])
 

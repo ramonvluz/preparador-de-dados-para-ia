@@ -26,7 +26,7 @@ def test_word_fixture_matches_standard_business_brief_geometry() -> None:
     assert normal.font.size.pt == pytest.approx(11)
     assert normal.paragraph_format.space_after.pt == pytest.approx(6)
     assert normal.paragraph_format.line_spacing == pytest.approx(1.10)
-    assert section.header.paragraphs[0].text == "LIMEBH | FIXTURE DOCX 3D"
+    assert section.header.paragraphs[0].text == "PREPARADOR | FIXTURE DOCX 3D"
     assert "nenhum dado real" in section.footer.paragraphs[0].text
 
 

@@ -27,8 +27,8 @@ obter uma ordem de leitura útil, sem prometer reprodução visual do documento.
 Cada parte Markdown começa com metadados locais e utiliza os marcadores:
 
 ```text
-<!-- LIMEBH_PAGE_START page=N -->
-<!-- LIMEBH_PAGE_END page=N -->
+<!-- PREPARADOR_PAGE_START page=N -->
+<!-- PREPARADOR_PAGE_END page=N -->
 ```
 
 Quando uma página isolada excede o limite configurado, ela é segmentada e os

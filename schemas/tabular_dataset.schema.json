@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://limebh.local/schemas/tabular_dataset-1.0.json",
-  "title": "LIMEBH Tabular Dataset",
+  "$id": "https://preparador-dados.local/schemas/tabular_dataset-1.0.json",
+  "title": "Preparador Tabular Dataset",
   "type": "object",
   "required": ["schema_version", "record_type", "record_id", "source", "data", "processing"],
   "properties": {

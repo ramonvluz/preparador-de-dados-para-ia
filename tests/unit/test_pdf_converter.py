@@ -5,10 +5,10 @@ from pathlib import Path
 
 from jsonschema import Draft202012Validator
 
-from limebh_preparador.application.progress import ConversionProgress
-from limebh_preparador.converters.base import ConversionContext
-from limebh_preparador.converters.pdf import PdfDocumentConverter
-from limebh_preparador.core.cancellation import CancellationToken
+from preparador_dados_ia.application.progress import ConversionProgress
+from preparador_dados_ia.converters.base import ConversionContext
+from preparador_dados_ia.converters.pdf import PdfDocumentConverter
+from preparador_dados_ia.core.cancellation import CancellationToken
 
 PROJECT_ROOT = Path(__file__).parents[2]
 FIXTURE = PROJECT_ROOT / "tests" / "fixtures" / "artificial_document.pdf"
@@ -38,7 +38,7 @@ def test_pdf_converter_extracts_valid_contract_without_changing_source() -> None
     Draft202012Validator(json.loads(SCHEMA.read_text(encoding="utf-8"))).validate(record)
     assert record["source"]["file_name"] == "artificial_document.pdf"
     assert record["data"]["title"] == "Relatorio Artificial da Fase 3C"
-    assert record["data"]["author"] == "LIMEBH"
+    assert record["data"]["author"] == "Projeto Artificial"
     assert record["data"]["page_count"] == 3
     assert [page["extraction_method"] for page in record["data"]["pages"]] == [
         "embedded_text",

@@ -5,19 +5,19 @@ from pathlib import Path
 import pytest
 from jsonschema import Draft202012Validator
 
-from limebh_preparador.contracts.pdf import (
+from preparador_dados_ia.contracts.pdf import (
     PdfEmbeddedFile,
     PdfImage,
     PdfOutlineItem,
     PdfPage,
     build_pdf_document_record,
 )
-from limebh_preparador.contracts.text import (
+from preparador_dados_ia.contracts.text import (
     TextHeading,
     TextSection,
     build_text_document_record,
 )
-from limebh_preparador.contracts.word import (
+from preparador_dados_ia.contracts.word import (
     WordHeading,
     WordListItem,
     WordParagraph,
@@ -87,7 +87,7 @@ def test_pdf_document_record_preserves_page_references_and_catalogs() -> None:
         source_file="relatorio.pdf",
         source_size_bytes=2048,
         title="Relatório",
-        author="LIMEBH",
+        author="Projeto Artificial",
         pages=[
             PdfPage(page_number=1, text="Página textual", extraction_method="embedded_text"),
             PdfPage(page_number=2, text="Página digitalizada", extraction_method="ocr"),
@@ -132,7 +132,7 @@ def test_word_document_record_preserves_ordered_blocks_and_sections() -> None:
         source_file="manual.docx",
         source_size_bytes=4096,
         title="Manual",
-        author="LIMEBH",
+        author="Projeto Artificial",
         blocks=blocks,
         sections=[WordSection(title="Contratação", level=1, start_block=0, end_block=3)],
         converted_at=CONVERTED_AT,

@@ -2,8 +2,8 @@ from pathlib import Path
 
 import pytest
 
-from limebh_preparador.application.conversion import DestinationProfile
-from limebh_preparador.ui.state import (
+from preparador_dados_ia.application.conversion import DestinationProfile
+from preparador_dados_ia.ui.state import (
     DesktopConversionRequest,
     UiProfile,
     human_duration,

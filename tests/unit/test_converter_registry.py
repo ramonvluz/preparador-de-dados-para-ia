@@ -4,14 +4,14 @@ from pathlib import Path
 
 import pytest
 
-from limebh_preparador.converters import (
+from preparador_dados_ia.converters import (
     ConversionContext,
     ConverterRegistrationError,
     ConverterRegistry,
     RecordConverter,
     UnsupportedSourceFormat,
 )
-from limebh_preparador.core.cancellation import CancellationToken
+from preparador_dados_ia.core.cancellation import CancellationToken
 
 
 class FakeConverter:

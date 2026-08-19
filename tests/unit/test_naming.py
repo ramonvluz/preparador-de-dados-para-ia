@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 from pathlib import Path
 
-from limebh_preparador.application.naming import automatic_output_dir, slugify_filename
+from preparador_dados_ia.application.naming import automatic_output_dir, slugify_filename
 
 
 def test_automatic_output_name_is_local_and_collision_safe(tmp_path: Path) -> None:

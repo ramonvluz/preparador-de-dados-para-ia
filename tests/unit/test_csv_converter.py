@@ -4,11 +4,11 @@ from pathlib import Path
 
 from jsonschema import Draft202012Validator
 
-from limebh_preparador.contracts.tabular import TABULAR_RECORD_TYPE
-from limebh_preparador.converters.base import ConversionContext
-from limebh_preparador.converters.csv import CsvDatasetConverter
-from limebh_preparador.core.cancellation import CancellationToken
-from limebh_preparador.core.cleaning import UnicodeSanitizer
+from preparador_dados_ia.contracts.tabular import TABULAR_RECORD_TYPE
+from preparador_dados_ia.converters.base import ConversionContext
+from preparador_dados_ia.converters.csv import CsvDatasetConverter
+from preparador_dados_ia.core.cancellation import CancellationToken
+from preparador_dados_ia.core.cleaning import UnicodeSanitizer
 
 PROJECT_ROOT = Path(__file__).parents[2]
 SCHEMA = json.loads(
