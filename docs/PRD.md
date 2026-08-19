@@ -5,7 +5,7 @@
 - **Produto:** Preparador de Dados para IA
 - **Tipo de documento:** Documento de Requisitos do Produto (PRD)
 - **Versão:** 0.3
-- **Status:** MVP funcional; revisão manual final antes da distribuição Windows
+- **Status:** MVP funcional; versão portátil Windows gerada e em validação externa
 - **Responsável:** Autor do projeto
 - **Plataforma inicial:** Windows desktop
 
@@ -650,9 +650,9 @@ Limites atuais conhecidos:
 - Detectar possíveis dados pessoais.
 - Oferecer anonimização opcional.
 
-### Fase 6 — Distribuição — próxima
+### Fase 6 — Distribuição — em andamento
 
-- Criar executável Windows.
+- Criar executável Windows. Versão portátil `onedir` concluída.
 - Avaliar versão portátil e instalador.
 - Adicionar identidade visual do produto.
 - Testar em máquina sem Python.
@@ -739,7 +739,8 @@ Estas decisões serão tomadas durante as fases correspondentes:
 
 ## 27. Próximo incremento
 
-O próximo incremento será uma rodada manual de regressão com novos arquivos de
-cada formato suportado. Após a aprovação dessa rodada, começa a Fase 6 com a
-criação do executável Windows, teste em máquina sem Python e preparação de um
-manual curto. Privacidade, `body_analysis`, anexos e OCR ficam fora do MVP atual.
+O próximo incremento será testar o ZIP portátil em uma máquina Windows sem
+Python, incluindo uma conversão narrativa, uma tabular e um MBOX. Após essa
+aprovação externa, a versão 0.1.0 poderá ser publicada e será decidido se um
+instalador entra na mesma versão. Privacidade, `body_analysis`, anexos e OCR
+ficam fora do MVP atual.

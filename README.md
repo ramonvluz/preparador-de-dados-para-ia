@@ -3,7 +3,7 @@
 Aplicação local para converter, limpar, estruturar e particionar arquivos
 administrativos antes do uso em plataformas de IA ou integrações via API.
 
-**Status atual:** MVP funcional; revisão manual final antes do empacotamento Windows.
+**Status atual:** MVP funcional; versão portátil Windows gerada e em validação.
 
 Este repositório contém a nova base modular do produto. A base atual implementa
 a conversão incremental de MBOX, o contrato versionado `email_message`, limpeza
@@ -103,11 +103,30 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\validate.ps1
 O script executa os testes, a análise estática e a compilação dos módulos. As
 fixtures em `tests/fixtures` são artificiais e usam domínios reservados.
 
+## Versão portátil Windows
+
+O build utiliza PyInstaller em modo `onedir`, sem janela de terminal. Para gerar
+o executável, o ZIP portátil e o arquivo de verificação SHA-256:
+
+```powershell
+.\scripts\build_portable.ps1
+```
+
+Os artefatos são gravados em `dist/`:
+
+- `Preparador de Dados para IA/`: pasta executável completa;
+- `Preparador-de-Dados-para-IA-portatil-0.1.0-windows-x64.zip`: pacote para distribuição;
+- `SHA256SUMS.txt`: hash para verificação do ZIP.
+
+Consulte o [manual rápido](docs/MANUAL_RAPIDO.md). O pacote ainda deve ser testado
+em outro computador Windows sem Python antes de ser tratado como uma versão pública.
+
 ## Documentação
 
 - [Status atual do projeto](docs/STATUS_PROJETO.md)
 - [Arquitetura](docs/ARQUITETURA.md)
 - [PRD](docs/PRD.md)
+- [Manual rápido da versão portátil](docs/MANUAL_RAPIDO.md)
 - [Validação de equivalência](docs/VALIDACAO_EQUIVALENCIA.md)
 - [Validação da Fase 2 — MVP desktop](docs/VALIDACAO_FASE_2.md)
 - [Validação da Fase 3A — contratos e arquitetura](docs/VALIDACAO_FASE_3A.md)

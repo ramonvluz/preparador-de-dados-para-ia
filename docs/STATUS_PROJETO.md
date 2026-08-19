@@ -2,7 +2,7 @@
 
 **Atualizado em:** 19 de agosto de 2026  
 **Versão do aplicativo:** 0.1.0  
-**Situação:** MVP funcional; compactação das saídas antes do empacotamento Windows
+**Situação:** MVP funcional; versão portátil Windows gerada e em validação externa
 
 ## Entregas concluídas
 
@@ -13,7 +13,7 @@
 | 3 | TXT, Markdown, PDF e DOCX | Concluída |
 | 4 | Contratos tabulares, CSV e XLSX | Concluída |
 | 5 | Privacidade e conteúdo avançado | Adiada |
-| 6 | Empacotamento, identidade visual e distribuição Windows | Próxima |
+| 6 | Empacotamento, identidade visual e distribuição Windows | Em andamento |
 
 ## Validações atuais
 
@@ -21,8 +21,10 @@
 - CSV real: 113.036 linhas, 18 colunas e 19 partes, sem perdas ou falhas.
 - XLSX real: contrato `spreadsheet_workbook@1.0`, aba, intervalo, cabeçalhos,
   tipos e datas preservados, sem falhas.
-- Suíte automatizada: 103 testes aprovados.
+- Suíte automatizada: 105 testes aprovados.
 - Qualidade: análise estática e compilação aprovadas.
+- Build portátil `onedir` iniciado com sucesso sem usar o Python do ambiente virtual.
+- ZIP portátil descompactado e iniciado com título, ícone, versão e manual corretos.
 
 ## Capacidades disponíveis
 
@@ -40,7 +42,7 @@
 - XLSX sem suporte a `.xls`; fórmulas não são executadas.
 - Células fora de tabelas do Excel não são incluídas quando a aba contém tabelas.
 - Planilhas XLSX muito grandes ainda exigem teste específico de memória.
-- Refinamento visual e empacotamento Windows pertencem à Fase 6.
+- Refinamento visual adicional e instalador pertencem à continuação da Fase 6.
 
 ## Evoluções futuras adiadas
 
@@ -53,5 +55,7 @@ Esses itens não fazem parte do MVP nem do escopo imediato do produto.
 
 ## Próximo passo recomendado
 
-Validar manualmente as novas saídas compactas com uma amostra narrativa, uma
-tabular e um MBOX. Depois da aprovação, criar e testar o executável Windows.
+Copiar o ZIP portátil para outro computador Windows sem Python, iniciar o
+aplicativo e converter uma amostra narrativa, uma tabular e um MBOX. Depois da
+aprovação externa, publicar a versão 0.1.0 portátil e decidir se o instalador
+entra nesta versão ou em uma atualização posterior.

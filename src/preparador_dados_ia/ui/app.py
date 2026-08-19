@@ -1100,9 +1100,21 @@ def _enable_windows_dpi_awareness() -> None:
         pass
 
 
+def _set_window_icon(root: tk.Tk) -> None:
+    assets = Path(__file__).resolve().parents[1] / "assets"
+    icon_png = assets / "app_icon.png"
+    try:
+        image = tk.PhotoImage(file=str(icon_png))
+        root.iconphoto(True, image)
+        root._preparador_icon = image  # type: ignore[attr-defined]
+    except tk.TclError:
+        pass
+
+
 def main() -> int:
     _enable_windows_dpi_awareness()
     root = tk.Tk()
+    _set_window_icon(root)
     PreparadorApp(root)
     root.mainloop()
     return 0
