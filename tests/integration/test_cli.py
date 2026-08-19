@@ -1,5 +1,7 @@
 from pathlib import Path
 
+from openpyxl import Workbook
+
 from limebh_preparador.cli import main
 
 PROJECT_ROOT = Path(__file__).parents[2]
@@ -69,4 +71,21 @@ def test_cli_dispatches_csv_sources_to_tabular_json(tmp_path: Path, capsys: obje
     captured = capsys.readouterr()
     assert exit_code == 0
     assert "2/2 linhas" in captured.out
+    assert list((output / "PRONTO_PARA_IA").glob("*.json"))
+
+
+def test_cli_dispatches_xlsx_sources_to_spreadsheet_json(tmp_path: Path, capsys: object) -> None:
+    source = tmp_path / "dados.xlsx"
+    workbook = Workbook()
+    workbook.active.append(["Código", "Valor"])
+    workbook.active.append(["001", 10])
+    workbook.save(source)
+    workbook.close()
+    output = tmp_path / "xlsx_cli"
+
+    exit_code = main([str(source), "--output", str(output)])
+
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert "1/1 linha" in captured.out
     assert list((output / "PRONTO_PARA_IA").glob("*.json"))

@@ -17,11 +17,11 @@ infere de forma conservadora títulos em negrito e cabeçalhos prováveis de tab
 Sequências de caracteres suspeitas geram aviso, mas nunca são corrigidas
 automaticamente.
 
-A Fase 4A estabelece contratos versionados para CSV e XLSX, com colunas tipadas,
+A Fase 4 implementa contratos e conversores para CSV e XLSX, com colunas tipadas,
 segmentos de linhas, contexto de abas e intervalos e preservação auditável de
-fórmulas. Os conversores tabulares serão adicionados nos incrementos seguintes.
-O incremento 4B já converte CSV para JSON ou JSONL, detectando codificação,
-delimitador, cabeçalho e tipos de dados sem alterar o arquivo original.
+fórmulas. CSV detecta codificação, delimitador, cabeçalho e tipos. XLSX preserva
+abas, tabelas do Excel, intervalos, visibilidade e fórmulas sem executá-las nem
+seguir vínculos externos. Os arquivos originais não são alterados.
 
 ## Princípios de segurança
 
@@ -50,7 +50,7 @@ pasta exclusiva para a conversão. Para MBOX, o perfil `platform` gera JSON
 particionado e o perfil `api` gera JSONL. TXT e Markdown geram Markdown
 particionado nos dois perfis. PDF gera Markdown com marcadores explícitos de
 página e DOCX gera Markdown estruturado, conforme a recomendação automática do
-PRD. CSV gera JSON tabular no perfil `platform` e JSONL no perfil `api`.
+PRD. CSV e XLSX geram JSON tabular no perfil `platform` e JSONL no perfil `api`.
 
 ```powershell
 .\.venv\Scripts\limebh-preparador.exe emails.mbox --profile api
@@ -59,6 +59,7 @@ PRD. CSV gera JSON tabular no perfil `platform` e JSONL no perfil `api`.
 .\.venv\Scripts\limebh-preparador.exe relatorio.pdf
 .\.venv\Scripts\limebh-preparador.exe manual.docx
 .\.venv\Scripts\limebh-preparador.exe dados.csv --profile api
+.\.venv\Scripts\limebh-preparador.exe planejamento.xlsx
 .\.venv\Scripts\limebh-preparador.exe emails.mbox --output C:\saida\conversao
 .\.venv\Scripts\limebh-preparador.exe emails.mbox --max-size-mb 25 --max-tokens 250000
 ```
@@ -80,7 +81,7 @@ Também é possível executar diretamente como módulo:
 .\.venv\Scripts\python.exe -m limebh_preparador.ui
 ```
 
-A interface seleciona MBOX, TXT, Markdown, PDF, DOCX ou CSV e apresenta a saída
+A interface seleciona MBOX, TXT, Markdown, PDF, DOCX, CSV ou XLSX e apresenta a saída
 recomendada para cada combinação de fonte e perfil. Ela utiliza `Downloads\Preparador
 LIMEBH` por padrão e executa a conversão em uma thread separada. O cancelamento
 preserva partes concluídas e válidas.
@@ -105,3 +106,4 @@ fixtures em `tests/fixtures` são artificiais e usam domínios reservados.
 - [Validação da Fase 3D — DOCX](docs/VALIDACAO_FASE_3D.md)
 - [Validação da Fase 4A — contratos e arquitetura tabular](docs/VALIDACAO_FASE_4A.md)
 - [Validação da Fase 4B — CSV](docs/VALIDACAO_FASE_4B.md)
+- [Validação da Fase 4C — XLSX](docs/VALIDACAO_FASE_4C.md)

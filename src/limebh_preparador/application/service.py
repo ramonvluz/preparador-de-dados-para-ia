@@ -12,21 +12,24 @@ from limebh_preparador.converters.pdf import PdfDocumentConverter
 from limebh_preparador.converters.registry import ConverterRegistry
 from limebh_preparador.converters.text import TextDocumentConverter
 from limebh_preparador.converters.word import WordDocumentConverter
+from limebh_preparador.converters.xlsx import XlsxWorkbookConverter
 from limebh_preparador.core.cancellation import CancellationToken
 
 MBOX_EXTENSION = ".mbox"
 PDF_EXTENSION = ".pdf"
 DOCX_EXTENSION = ".docx"
 CSV_EXTENSION = ".csv"
+XLSX_EXTENSION = ".xlsx"
 TEXT_EXTENSIONS = TextDocumentConverter.supported_extensions
 SUPPORTED_SOURCE_EXTENSIONS = frozenset(
-    {MBOX_EXTENSION, PDF_EXTENSION, DOCX_EXTENSION, CSV_EXTENSION, *TEXT_EXTENSIONS}
+    {MBOX_EXTENSION, PDF_EXTENSION, DOCX_EXTENSION, CSV_EXTENSION, XLSX_EXTENSION, *TEXT_EXTENSIONS}
 )
 
 
 def build_default_registry() -> ConverterRegistry:
     registry = ConverterRegistry()
     registry.register(CsvDatasetConverter())
+    registry.register(XlsxWorkbookConverter())
     registry.register(TextDocumentConverter())
     registry.register(PdfDocumentConverter())
     registry.register(WordDocumentConverter())
@@ -54,7 +57,7 @@ def convert_source(
 
     registry = build_default_registry()
     converter = registry.resolve(input_path)
-    if converter.record_type == "tabular_dataset":
+    if converter.record_type in {"tabular_dataset", "spreadsheet_workbook"}:
         return convert_tabular(input_path, output_dir, converter=converter, **common)
     return convert_document(
         input_path,
@@ -79,6 +82,8 @@ def source_format_id(path: Path) -> str:
         return "docx"
     if suffix == ".csv":
         return "csv"
+    if suffix == ".xlsx":
+        return "xlsx"
     return suffix.removeprefix(".") or "unknown"
 
 
@@ -90,6 +95,7 @@ def source_format_label(path: Path) -> str:
         "pdf": "PDF",
         "docx": "DOCX",
         "csv": "CSV",
+        "xlsx": "XLSX",
     }.get(source_format_id(path), "Desconhecido")
 
 
@@ -100,6 +106,6 @@ def source_unit_label(path: Path, *, plural: bool = False) -> str:
         return "páginas" if plural else "página"
     if path.suffix.lower() == DOCX_EXTENSION:
         return "blocos" if plural else "bloco"
-    if path.suffix.lower() == CSV_EXTENSION:
+    if path.suffix.lower() in {CSV_EXTENSION, XLSX_EXTENSION}:
         return "linhas" if plural else "linha"
     return "documentos" if plural else "documento"

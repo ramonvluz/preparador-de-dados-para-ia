@@ -11,7 +11,11 @@ from limebh_preparador.converters.base import ConversionContext, RecordConverter
 from limebh_preparador.core.cancellation import CancellationToken, ConversionCancelled
 from limebh_preparador.core.cleaning import UnicodeSanitizer, sanitize_record
 from limebh_preparador.core.partitioning import PartitionLimits, record_metrics
-from limebh_preparador.outputs.artifacts import write_report, write_tabular_readme
+from limebh_preparador.outputs.artifacts import (
+    write_report,
+    write_spreadsheet_readme,
+    write_tabular_readme,
+)
 from limebh_preparador.outputs.parts import PartWriter
 
 
@@ -47,13 +51,19 @@ def convert_tabular(
         filename_prefix="dados",
     )
     sanitizer = UnicodeSanitizer()
+    source_format = input_path.suffix.lower().removeprefix(".")
     total_rows = converted_rows = segment_count = oversized = 0
     column_count = ragged_rows = blank_rows_skipped = 0
+    sheet_count = table_count = formula_count = 0
+    merged_ranges = hidden_rows = hidden_columns = 0
     encoding: str | None = None
     delimiter: str | None = None
     has_header: bool | None = None
     warnings: set[str] = set()
     errors: list[dict[str, object]] = []
+    seen_datasets: set[tuple[object, ...]] = set()
+    dataset_segment_counts: dict[tuple[object, ...], int] = {}
+    seen_sheets: set[object] = set()
     cancelled = False
     notify_progress(progress_callback, "preparing", 0, 1)
 
@@ -81,16 +91,33 @@ def convert_tabular(
             rows = dataset.get("rows") if isinstance(dataset, dict) else None
             columns = dataset.get("columns") if isinstance(dataset, dict) else None
             row_count = len(rows) if isinstance(rows, list) else 0
-            total_rows = max(
-                total_rows,
-                int(dataset.get("total_rows", 0)) if isinstance(dataset, dict) else 0,
-            )
             converted_rows += row_count
-            column_count = len(columns) if isinstance(columns, list) else column_count
+            column_count = max(column_count, len(columns) if isinstance(columns, list) else 0)
             has_header = (
                 bool(dataset.get("has_header")) if isinstance(dataset, dict) else has_header
             )
             if isinstance(data, dict):
+                workbook = data.get("workbook")
+                sheet = data.get("sheet")
+                sheet_index = sheet.get("index") if isinstance(sheet, dict) else None
+                sheet_count = max(
+                    sheet_count,
+                    int(workbook.get("sheet_count", 0)) if isinstance(workbook, dict) else 0,
+                )
+                dataset_key = (
+                    sheet_index,
+                    dataset.get("name") if isinstance(dataset, dict) else None,
+                    dataset.get("reference") if isinstance(dataset, dict) else None,
+                )
+                dataset_segment_counts[dataset_key] = dataset_segment_counts.get(dataset_key, 0) + 1
+                if isinstance(dataset, dict) and dataset_key not in seen_datasets:
+                    seen_datasets.add(dataset_key)
+                    total_rows += int(dataset.get("total_rows", 0) or 0)
+                    if dataset.get("source_kind") == "excel_table":
+                        table_count += 1
+                formulas = data.get("formulas")
+                if isinstance(formulas, list):
+                    formula_count += len(formulas)
                 encoding = str(data.get("encoding") or encoding or "") or None
                 dialect = data.get("dialect")
                 if isinstance(dialect, dict):
@@ -101,6 +128,13 @@ def convert_tabular(
                 blank_rows_skipped = int(
                     processing.get("blank_rows_skipped", blank_rows_skipped) or 0
                 )
+                sheet = data.get("sheet") if isinstance(data, dict) else None
+                sheet_index = sheet.get("index") if isinstance(sheet, dict) else None
+                if sheet_index is not None and sheet_index not in seen_sheets:
+                    seen_sheets.add(sheet_index)
+                    merged_ranges += int(processing.get("merged_ranges", 0) or 0)
+                    hidden_rows += int(processing.get("hidden_rows", 0) or 0)
+                    hidden_columns += int(processing.get("hidden_columns", 0) or 0)
 
             _, record_bytes, record_tokens = record_metrics(sanitized)
             if record_bytes > writer.single_record_limits.max_bytes or (
@@ -150,7 +184,7 @@ def convert_tabular(
                 "file_name": input_path.name,
                 "size_bytes": source_stat.st_size,
                 "modified_at": datetime.fromtimestamp(source_stat.st_mtime, tz=UTC).isoformat(),
-                "detected_format": "csv",
+                "detected_format": source_format,
                 "contract": f"{converter.record_type}@1.0",
             }
         ],
@@ -167,11 +201,44 @@ def convert_tabular(
         "total_records": total_rows,
         "converted_records": converted_rows,
         "failed_records": failed,
-        "segmented_records": 1 if segment_count > 1 else 0,
+        "segmented_records": sum(count > 1 for count in dataset_segment_counts.values()),
         "oversized_records": oversized,
         "warnings_count": len(warnings),
         "unicode_cleanup": sanitizer.report(),
-        "tabular_extraction": {
+        "parts": parts,
+        "errors": errors,
+        "omitted_content": {"external_references_downloaded": False},
+        "generated_files": generated_files,
+        "result": result,
+    }
+    if source_format == "xlsx":
+        report["spreadsheet_extraction"] = {
+            "sheets": sheet_count,
+            "datasets": len(seen_datasets),
+            "tables": table_count,
+            "columns_max": column_count,
+            "rows": total_rows,
+            "segments": segment_count,
+            "formulas": formula_count,
+            "merged_ranges": merged_ranges,
+            "hidden_rows": hidden_rows,
+            "hidden_columns": hidden_columns,
+            "external_links_followed": False,
+        }
+        write_spreadsheet_readme(
+            output_dir,
+            source_name=input_path.name,
+            converted_rows=converted_rows,
+            sheet_count=sheet_count,
+            dataset_count=len(seen_datasets),
+            table_count=table_count,
+            formula_count=formula_count,
+            part_count=len(parts),
+            output_format=settings.output_format,
+            cancelled=cancelled,
+        )
+    else:
+        report["tabular_extraction"] = {
             "encoding": encoding,
             "delimiter": delimiter,
             "has_header": has_header,
@@ -180,23 +247,17 @@ def convert_tabular(
             "segments": segment_count,
             "ragged_rows_normalized": ragged_rows,
             "blank_rows_skipped": blank_rows_skipped,
-        },
-        "parts": parts,
-        "errors": errors,
-        "omitted_content": {"external_references_downloaded": False},
-        "generated_files": generated_files,
-        "result": result,
-    }
-    write_tabular_readme(
-        output_dir,
-        source_name=input_path.name,
-        converted_rows=converted_rows,
-        column_count=column_count,
-        part_count=len(parts),
-        encoding=encoding,
-        output_format=settings.output_format,
-        cancelled=cancelled,
-    )
+        }
+        write_tabular_readme(
+            output_dir,
+            source_name=input_path.name,
+            converted_rows=converted_rows,
+            column_count=column_count,
+            part_count=len(parts),
+            encoding=encoding,
+            output_format=settings.output_format,
+            cancelled=cancelled,
+        )
     write_report(output_dir, report)
     notify_progress(
         progress_callback,

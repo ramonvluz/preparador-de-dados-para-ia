@@ -1,6 +1,8 @@
 from pathlib import Path
 from queue import Empty
 
+from openpyxl import Workbook
+
 from limebh_preparador.ui.state import DesktopConversionRequest, UiProfile
 from limebh_preparador.ui.worker import (
     ConversionWorker,
@@ -114,4 +116,24 @@ def test_worker_dispatches_csv_and_reports_rows(tmp_path: Path) -> None:
     assert finished.report["converted_records"] == 2
     assert finished.report["tabular_extraction"]["columns"] == 2
     assert any(event.progress.current == 2 for event in progress)
+    assert list((finished.output_dir / "PRONTO_PARA_IA").glob("*.json"))
+
+
+def test_worker_dispatches_xlsx_and_reports_sheets(tmp_path: Path) -> None:
+    source = tmp_path / "dados.xlsx"
+    workbook = Workbook()
+    workbook.active.append(["Código", "Valor"])
+    workbook.active.append(["001", 10])
+    workbook.save(source)
+    workbook.close()
+    worker = ConversionWorker()
+    request = DesktopConversionRequest(source=source, output_root=tmp_path)
+
+    worker.start(request)
+    worker.wait(timeout=10)
+    events = _drain_events(worker)
+
+    finished = next(event for event in events if isinstance(event, WorkerFinished))
+    assert finished.report["converted_records"] == 1
+    assert finished.report["spreadsheet_extraction"]["sheets"] == 1
     assert list((finished.output_dir / "PRONTO_PARA_IA").glob("*.json"))

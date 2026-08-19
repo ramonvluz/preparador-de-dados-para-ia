@@ -105,6 +105,58 @@ def write_tabular_readme(
     return path
 
 
+def write_spreadsheet_readme(
+    output_dir: Path,
+    *,
+    source_name: str,
+    converted_rows: int,
+    sheet_count: int,
+    dataset_count: int,
+    table_count: int,
+    formula_count: int,
+    part_count: int,
+    output_format: OutputFormat,
+    cancelled: bool,
+) -> Path:
+    status_line = (
+        "A conversão foi cancelada com segurança; somente partes completas foram mantidas."
+        if cancelled
+        else "A conversão foi concluída."
+    )
+    lines = [
+        "PREPARADOR DE DADOS PARA IA — LIMEBH",
+        "",
+        status_line,
+        f"Fonte: {source_name}",
+        "Tipo identificado: XLSX",
+        f"Abas identificadas: {sheet_count}",
+        f"Conjuntos tabulares: {dataset_count}",
+        f"Tabelas do Excel: {table_count}",
+        f"Linhas convertidas: {converted_rows}",
+        f"Fórmulas catalogadas: {formula_count}",
+        f"Partes geradas: {part_count}",
+        f"Formato: {output_format.value.upper()}",
+        "",
+        "COMO USAR",
+        "Envie os arquivos da pasta PRONTO_PARA_IA em ordem numérica.",
+        "Cada registro informa a aba, a tabela ou intervalo e as linhas correspondentes.",
+        "",
+        "FÓRMULAS",
+        "As fórmulas não são executadas pelo preparador.",
+        "A expressão original é catalogada e o valor em cache é usado quando disponível.",
+        "Vínculos externos nunca são seguidos.",
+        "",
+        "PRIVACIDADE",
+        (
+            "A saída pode conter dados pessoais. Compartilhe apenas com pessoas "
+            "e serviços autorizados."
+        ),
+    ]
+    path = output_dir / "LEIA-ME.txt"
+    atomic_write_text(path, "\n".join(lines) + "\n")
+    return path
+
+
 def write_document_readme(
     output_dir: Path,
     *,

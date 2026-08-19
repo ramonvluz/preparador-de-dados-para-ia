@@ -60,7 +60,7 @@ class PreparadorApp:
         self.file_name_var = tk.StringVar(value="Nenhum arquivo selecionado")
         self.file_detail_var = tk.StringVar(
             value=(
-                "Adicione um arquivo MBOX, TXT, Markdown, PDF, DOCX ou CSV. "
+                "Adicione um arquivo MBOX, TXT, Markdown, PDF, DOCX, CSV ou XLSX. "
                 "O original permanecerá intocado."
             )
         )
@@ -801,13 +801,14 @@ class PreparadorApp:
             title="Selecionar arquivo de origem",
             initialdir=initial_dir,
             filetypes=[
-                ("Formatos suportados", "*.mbox *.txt *.md *.markdown *.pdf *.docx *.csv"),
+                ("Formatos suportados", "*.mbox *.txt *.md *.markdown *.pdf *.docx *.csv *.xlsx"),
                 ("MBOX", "*.mbox"),
                 ("Texto", "*.txt"),
                 ("Markdown", "*.md *.markdown"),
                 ("PDF", "*.pdf"),
                 ("Word", "*.docx"),
                 ("CSV", "*.csv"),
+                ("Excel", "*.xlsx"),
                 ("Todos os arquivos", "*.*"),
             ],
         )
@@ -817,7 +818,7 @@ class PreparadorApp:
         if path.suffix.lower() not in SUPPORTED_SOURCE_EXTENSIONS:
             messagebox.showwarning(
                 "Formato não suportado",
-                "Selecione um arquivo MBOX, TXT, Markdown, PDF, DOCX ou CSV.",
+                "Selecione um arquivo MBOX, TXT, Markdown, PDF, DOCX, CSV ou XLSX.",
                 parent=self.root,
             )
             return
@@ -837,7 +838,7 @@ class PreparadorApp:
         self.source_path = None
         self.file_name_var.set("Nenhum arquivo selecionado")
         self.file_detail_var.set(
-            "Adicione um arquivo MBOX, TXT, Markdown, PDF, DOCX ou CSV. "
+            "Adicione um arquivo MBOX, TXT, Markdown, PDF, DOCX, CSV ou XLSX. "
             "O original permanecerá intocado."
         )
         self.file_path_var.set("")
@@ -859,7 +860,7 @@ class PreparadorApp:
         if self.source_path is None:
             messagebox.showinfo(
                 "Selecione um arquivo",
-                "Adicione um arquivo MBOX, TXT, Markdown, PDF, DOCX ou CSV antes de iniciar.",
+                "Adicione um arquivo MBOX, TXT, Markdown, PDF, DOCX, CSV ou XLSX antes de iniciar.",
                 parent=self.root,
             )
             return

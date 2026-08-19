@@ -28,7 +28,7 @@ from limebh_preparador.core.paths import default_output_root
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
-            "Prepara arquivos MBOX, TXT, Markdown, PDF, DOCX ou CSV para uso com IA, "
+            "Prepara arquivos MBOX, TXT, Markdown, PDF, DOCX, CSV ou XLSX para uso com IA, "
             "sem enviar dados à internet."
         )
     )
@@ -46,7 +46,7 @@ def build_parser() -> argparse.ArgumentParser:
         choices=[profile.value for profile in DestinationProfile],
         default=DestinationProfile.PLATFORM.value,
         help=(
-            "Destino: para MBOX e CSV, platform gera JSON e api gera JSONL; "
+            "Destino: para MBOX, CSV e XLSX, platform gera JSON e api gera JSONL; "
             "documentos narrativos geram Markdown"
         ),
     )
@@ -69,7 +69,9 @@ def _show_progress(progress: ConversionProgress, source: Path) -> None:
         progress.current == 1 or progress.current % 250 == 0 or progress.current == progress.total
     ):
         participle = (
-            "Processadas" if source.suffix.lower() in {".mbox", ".pdf", ".csv"} else "Processados"
+            "Processadas"
+            if source.suffix.lower() in {".mbox", ".pdf", ".csv", ".xlsx"}
+            else "Processados"
         )
         amount = (
             f"{progress.current}/{progress.total}"

@@ -48,11 +48,11 @@ def test_desktop_request_validates_source_and_builds_settings(tmp_path: Path) ->
 
 
 def test_desktop_request_rejects_unsupported_extension(tmp_path: Path) -> None:
-    source = tmp_path / "artificial.xlsx"
+    source = tmp_path / "artificial.xls"
     source.write_text("artificial", encoding="utf-8")
     request = DesktopConversionRequest(source=source, output_root=tmp_path)
 
-    with pytest.raises(ValueError, match="MBOX, TXT, Markdown, PDF, DOCX ou CSV"):
+    with pytest.raises(ValueError, match="MBOX, TXT, Markdown, PDF, DOCX, CSV ou XLSX"):
         request.validate()
 
 
@@ -87,6 +87,27 @@ def test_csv_source_recommends_profile_specific_tabular_format(tmp_path: Path) -
 def test_desktop_request_accepts_csv_and_ignores_html(tmp_path: Path) -> None:
     source = tmp_path / "artificial.csv"
     source.write_text("Código,Valor\n1,10\n", encoding="utf-8")
+    request = DesktopConversionRequest(source=source, output_root=tmp_path, include_html=True)
+
+    request.validate()
+
+    assert request.settings.include_html is False
+
+
+def test_xlsx_source_recommends_profile_specific_spreadsheet_format(tmp_path: Path) -> None:
+    source = tmp_path / "artificial.xlsx"
+
+    platform = recommendation_for(UiProfile.PLATFORM, source)
+    api = recommendation_for(UiProfile.API, source)
+
+    assert platform.format_name == "JSON de planilha"
+    assert api.format_name == "JSONL de planilha"
+    assert "fórmulas" in platform.explanation
+
+
+def test_desktop_request_accepts_xlsx_and_ignores_html(tmp_path: Path) -> None:
+    source = tmp_path / "artificial.xlsx"
+    source.write_bytes(b"artificial")
     request = DesktopConversionRequest(source=source, output_root=tmp_path, include_html=True)
 
     request.validate()
