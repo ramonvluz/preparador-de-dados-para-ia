@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import re
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -136,49 +135,13 @@ def _render_part(
     segment_count: int | None,
 ) -> str:
     source = record.get("source")
-    data = record.get("data")
-    processing = record.get("processing")
-    if (
-        not isinstance(source, dict)
-        or not isinstance(data, dict)
-        or not isinstance(processing, dict)
-    ):
+    if not isinstance(source, dict):
         raise TypeError("Envelope textual incompleto")
 
-    metadata: list[tuple[str, object]] = [
-        ("schema_version", record.get("schema_version")),
-        ("record_type", record.get("record_type")),
-        ("record_id", record.get("record_id")),
-        ("source_file", source.get("file_name")),
-        ("source_type", source.get("file_type")),
-        ("source_size_bytes", source.get("size_bytes")),
-        ("encoding", data.get("encoding")),
-        ("content_format", data.get("content_format")),
-        ("converted_at", processing.get("converted_at")),
-        ("unicode_cleaned", processing.get("unicode_cleaned")),
-        ("content_line_start", line_start),
-        ("content_line_end", line_end),
-        (
-            "warnings",
-            list(processing.get("warnings") or [])
-            + (["oversized_text_document_segmented"] if segment_number is not None else []),
-        ),
-    ]
-    if data.get("title") is not None:
-        metadata.insert(8, ("title", data["title"]))
+    provenance = f"> Fonte: {source.get('file_name') or 'não informada'}"
     if segment_number is not None and segment_count is not None:
-        metadata.extend(
-            [
-                ("segment_number", segment_number),
-                ("segment_count", segment_count),
-            ]
-        )
-    header = "\n".join(f"{key}: {_yaml_scalar(value)}" for key, value in metadata)
-    return f"---\n{header}\n---\n\n{body.rstrip()}\n"
-
-
-def _yaml_scalar(value: object) -> str:
-    return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
+        provenance += f" — parte {segment_number}/{segment_count} (linhas {line_start}–{line_end})"
+    return f"{provenance}\n\n{body.rstrip()}\n"
 
 
 def _fits(content: str, limits: PartitionLimits) -> bool:

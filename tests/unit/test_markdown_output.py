@@ -27,8 +27,8 @@ def test_plain_text_is_represented_as_markdown_with_local_metadata(tmp_path: Pat
     output = (tmp_path / writer.parts[0].file).read_text(encoding="utf-8")
     assert segments == 1
     assert oversized is False
-    assert output.startswith('---\nschema_version: "1.0"')
-    assert 'source_file: "relatorio.txt"' in output
+    assert output.startswith("> Fonte: relatorio.txt\n\n")
+    assert "schema_version" not in output
     assert "# RELATÓRIO" in output
     assert "Conteúdo local." in output
     assert "C:\\" not in output
@@ -55,6 +55,5 @@ def test_large_markdown_is_split_into_bounded_standalone_parts(tmp_path: Path) -
         path = tmp_path / part.file
         output = path.read_text(encoding="utf-8")
         assert path.stat().st_size <= limits.max_bytes
-        assert output.startswith("---\n")
-        assert "segment_number:" in output
-        assert f"segment_count: {segments}" in output
+        assert output.startswith("> Fonte: manual.md — parte ")
+        assert f"/{segments} (linhas " in output

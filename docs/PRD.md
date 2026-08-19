@@ -303,8 +303,14 @@ Não haverá um único esquema interno para todos os documentos. Haverá:
 | `processing.converted_at` | Sim | Data e hora da conversão |
 | `processing.warnings` | Sim | Lista, possivelmente vazia, de avisos |
 
-O caminho absoluto da fonte ficará apenas no relatório local, evitando expor
-informações do computador nos arquivos enviados à IA.
+O caminho absoluto da fonte não será gravado nos artefatos nem no relatório,
+evitando expor informações do computador quando a saída for compartilhada.
+
+Os contratos desta seção pertencem à camada interna de extração e auditoria.
+Antes da gravação em `PRONTO_PARA_IA`, uma camada de apresentação compacta
+remove o envelope técnico repetitivo e mantém apenas conteúdo, proveniência
+mínima, intervalos de particionamento e omissões relevantes. Os detalhes
+técnicos agregados permanecem em `relatorio_conversao.json`.
 
 ### 13.3 Contrato `email_message`
 
@@ -399,8 +405,10 @@ Fonte: PDF. O texto preservará referências de página.
 }
 ```
 
-Na saída Markdown, o mesmo contrato conceitual será representado com metadados
-iniciais e marcadores explícitos de página.
+Na saída Markdown, o contrato será representado de forma compacta, com nome da
+fonte, intervalo da parte, avisos curtos sobre conteúdo omitido e títulos de
+página. IDs técnicos, timestamps, catálogos e marcadores internos ficam fora do
+arquivo destinado à IA e são registrados no relatório quando aplicável.
 
 ### 13.5 Contratos planejados
 

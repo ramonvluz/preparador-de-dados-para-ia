@@ -10,6 +10,11 @@ a conversão incremental de MBOX, o contrato versionado `email_message`, limpeza
 Unicode auditável, particionamento por bytes e tokens, saídas JSON/JSONL,
 relatório, cancelamento seguro, CLI e interface desktop.
 
+Os contratos completos permanecem na camada interna de extração e auditoria.
+Os arquivos de `PRONTO_PARA_IA` usam uma representação compacta: preservam o
+conteúdo e o contexto necessário à análise, sem repetir IDs, timestamps e
+metadados de processamento em cada registro.
+
 A Fase 3 converte TXT, Markdown, PDF e DOCX para partes Markdown
 autossuficientes. PDFs preservam referências explícitas de página e catalogam
 sumário, anexos e imagens sem copiar seus binários. DOCX preserva a ordem de
@@ -30,7 +35,7 @@ seguir vínculos externos. Os arquivos originais não são alterados.
 - O processamento é local e não envia dados para a internet.
 - A fonte é lida no local original e não é alterada, movida ou copiada.
 - Anexos são apenas catalogados; seus binários não entram nos JSONs.
-- O caminho absoluto da fonte aparece somente no relatório local.
+- O caminho absoluto da fonte não é gravado nos artefatos nem no relatório.
 - Erros por mensagem não registram o conteúdo da mensagem.
 
 ## Preparação do ambiente
@@ -50,8 +55,8 @@ No PowerShell, a partir da raiz do projeto:
 Por padrão, o resultado é criado em `Downloads\Preparador de Dados para IA`, com uma
 pasta exclusiva para a conversão. Para MBOX, o perfil `platform` gera JSON
 particionado e o perfil `api` gera JSONL. TXT e Markdown geram Markdown
-particionado nos dois perfis. PDF gera Markdown com marcadores explícitos de
-página e DOCX gera Markdown estruturado, conforme a recomendação automática do
+particionado nos dois perfis. PDF gera Markdown com títulos de página e DOCX
+gera Markdown estruturado, conforme a recomendação automática do
 PRD. CSV e XLSX geram JSON tabular no perfil `platform` e JSONL no perfil `api`.
 
 ```powershell

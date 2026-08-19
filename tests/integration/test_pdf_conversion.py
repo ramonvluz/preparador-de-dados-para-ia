@@ -45,9 +45,13 @@ def test_pdf_conversion_generates_page_marked_markdown_and_audit_report(
     assert ready_files
     ready_text = "\n".join(path.read_text(encoding="utf-8") for path in ready_files)
     assert "Relatorio Artificial da Fase 3C" in ready_text
-    assert "<!-- PREPARADOR_PAGE_START page=1 -->" in ready_text
-    assert "<!-- PREPARADOR_PAGE_START page=3 -->" in ready_text
-    assert "notas_artificiais.txt" in ready_text
+    assert "## Página 1" in ready_text
+    assert "## Página 3" in ready_text
+    assert "PREPARADOR_" not in ready_text
+    assert "schema_version" not in ready_text
+    assert "notas_artificiais.txt" not in ready_text
+    assert report["pdf_catalog"]["embedded_files"][0]["file_name"] == "notas_artificiais.txt"
+    assert "absolute_path" not in report["sources"][0]
     assert str(FIXTURE.resolve()) not in ready_text
     assert (output / "LEIA-ME.txt").is_file()
     assert (output / "relatorio_conversao.json").is_file()

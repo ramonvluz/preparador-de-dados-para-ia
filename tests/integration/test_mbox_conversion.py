@@ -3,7 +3,6 @@ import json
 from pathlib import Path
 
 import pytest
-from jsonschema import Draft202012Validator
 
 from preparador_dados_ia.application.conversion import (
     ConversionSettings,
@@ -15,7 +14,6 @@ from preparador_dados_ia.core.cancellation import CancellationToken
 
 PROJECT_ROOT = Path(__file__).parents[2]
 FIXTURE = PROJECT_ROOT / "tests" / "fixtures" / "artificial_emails.mbox"
-SCHEMA = PROJECT_ROOT / "schemas" / "email_message.schema.json"
 
 
 def _sha256(path: Path) -> str:
@@ -43,7 +41,6 @@ def test_platform_conversion_preserves_source_and_generates_contract_outputs(
     assert (output / "LEIA-ME.txt").is_file()
     assert (output / "relatorio_conversao.json").is_file()
 
-    validator = Draft202012Validator(json.loads(SCHEMA.read_text(encoding="utf-8")))
     records: list[dict[str, object]] = []
     ready_text = ""
     for part in report["parts"]:
@@ -56,9 +53,12 @@ def test_platform_conversion_preserves_source_and_generates_contract_outputs(
     assert len(records) == 2
     assert "Y29udGV1ZG8gYXJ0aWZpY2lhbA==" not in ready_text
     for record in records:
-        validator.validate(record)
-        assert "absolute_path" not in record["source"]
-        assert record["source"]["file_name"] == FIXTURE.name
+        assert {"date", "from", "to", "subject", "body"} <= record.keys()
+        assert "schema_version" not in record
+        assert "record_type" not in record
+        assert "source" not in record
+        assert "processing" not in record
+    assert "absolute_path" not in report["sources"][0]
 
     with pytest.raises(FileExistsError):
         convert_mbox(FIXTURE, output)
@@ -77,7 +77,7 @@ def test_api_profile_generates_partitioned_jsonl(tmp_path: Path) -> None:
     for part in report["parts"]:
         assert part["file"].endswith(".jsonl")
         lines = (output / "PRONTO_PARA_IA" / part["file"]).read_text(encoding="utf-8").splitlines()
-        assert all(json.loads(line)["record_type"] == "email_message" for line in lines)
+        assert all("body" in json.loads(line) for line in lines)
 
 
 def test_cancellation_keeps_only_complete_artifacts(tmp_path: Path) -> None:

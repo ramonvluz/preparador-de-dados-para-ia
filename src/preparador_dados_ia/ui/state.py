@@ -72,15 +72,15 @@ def recommendation_for(
         return FormatRecommendation(
             format_name="Markdown com páginas",
             explanation=(
-                "Texto com marcadores explícitos de página, metadados e catálogos do PDF. "
-                "OCR não é aplicado nesta etapa."
+                "Texto com títulos de página e avisos curtos sobre conteúdo omitido. "
+                "Metadados técnicos ficam no relatório; OCR não é aplicado nesta etapa."
             ),
         )
     if source is not None and source.suffix.lower() in {".txt", ".md", ".markdown"}:
         return FormatRecommendation(
             format_name="Markdown particionado",
             explanation=(
-                "Texto limpo com metadados e partes numeradas, adequado tanto para envio "
+                "Texto limpo com proveniência mínima e partes numeradas, adequado para envio "
                 "manual quanto para busca semântica."
             ),
         )
@@ -88,8 +88,7 @@ def recommendation_for(
         return FormatRecommendation(
             format_name="JSONL particionado",
             explanation=(
-                "Um registro por linha, com metadados preservados para pipelines técnicos "
-                "e busca semântica."
+                "Um registro compacto por linha; os metadados técnicos ficam no relatório."
             ),
         )
     return FormatRecommendation(

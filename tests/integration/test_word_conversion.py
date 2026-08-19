@@ -58,6 +58,9 @@ def test_word_conversion_generates_structured_markdown_and_audit_report(
     assert "    - Subitem artificial para validar nível." in ready_text
     assert "Risco \\| mitigação" in ready_text
     assert "IMAGEM ARTIFICIAL" not in ready_text
+    assert "1 imagem(ns) não extraída(s)" in ready_text
+    assert "PREPARADOR_" not in ready_text
+    assert "schema_version" not in ready_text
     assert str(FIXTURE.resolve()) not in ready_text
     readme = (output / "LEIA-ME.txt").read_text(encoding="utf-8")
     assert "Tipo identificado: DOCX" in readme
@@ -126,7 +129,7 @@ def test_word_conversion_surfaces_quality_warning_and_inferred_structure(
     assert "# 1. Definiçºµo" in markdown
     assert "| Serviço | Objetivo | Resultado |" in markdown
     assert "| Coluna 1 |" not in markdown
-    assert "Aviso de qualidade do texto" in markdown
+    assert "1 sequência(s) de texto suspeita(s)" in markdown
     readme = (output / "LEIA-ME.txt").read_text(encoding="utf-8")
     assert "Tipo identificado: DOCX" in readme
     assert "ATENÇÃO: foram detectadas 1 sequência(s)" in readme

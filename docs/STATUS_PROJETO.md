@@ -2,7 +2,7 @@
 
 **Atualizado em:** 19 de agosto de 2026  
 **Versão do aplicativo:** 0.1.0  
-**Situação:** MVP funcional; revisão manual final antes do empacotamento Windows
+**Situação:** MVP funcional; compactação das saídas antes do empacotamento Windows
 
 ## Entregas concluídas
 
@@ -21,7 +21,7 @@
 - CSV real: 113.036 linhas, 18 colunas e 19 partes, sem perdas ou falhas.
 - XLSX real: contrato `spreadsheet_workbook@1.0`, aba, intervalo, cabeçalhos,
   tipos e datas preservados, sem falhas.
-- Suíte automatizada: 101 testes aprovados.
+- Suíte automatizada: 103 testes aprovados.
 - Qualidade: análise estática e compilação aprovadas.
 
 ## Capacidades disponíveis
@@ -31,6 +31,7 @@
 - Saídas narrativas: Markdown particionado.
 - Processamento local, original intocado, relatório e `LEIA-ME.txt`.
 - Interface gráfica e CLI.
+- Camada compacta em `PRONTO_PARA_IA`, com auditoria técnica separada no relatório.
 
 ## Limites conhecidos
 
@@ -52,5 +53,5 @@ Esses itens não fazem parte do MVP nem do escopo imediato do produto.
 
 ## Próximo passo recomendado
 
-Executar uma rodada manual de regressão com novos arquivos MBOX, TXT, Markdown,
-PDF, DOCX, CSV e XLSX. Depois da aprovação, criar e testar o executável Windows.
+Validar manualmente as novas saídas compactas com uma amostra narrativa, uma
+tabular e um MBOX. Depois da aprovação, criar e testar o executável Windows.

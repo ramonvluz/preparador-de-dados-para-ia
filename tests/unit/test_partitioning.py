@@ -10,6 +10,7 @@ from preparador_dados_ia.core.partitioning import (
     record_metrics,
     split_oversized_record,
 )
+from preparador_dados_ia.outputs.ai_ready import compact_email_record
 from preparador_dados_ia.outputs.parts import OutputFormat, PartWriter
 
 
@@ -60,10 +61,12 @@ def test_part_writer_produces_valid_bounded_files(
     tmp_path: Path,
     output_format: OutputFormat,
 ) -> None:
-    limits = PartitionLimits(max_bytes=2200, max_tokens=1100)
+    limits = PartitionLimits(max_bytes=700, max_tokens=350)
     writer = PartWriter(tmp_path, limits, output_format)
     for index in range(5):
-        writer.add(_record("texto " * 30, f"<artificial-{index}@example.invalid>"))
+        writer.add(
+            compact_email_record(_record("texto " * 30, f"<artificial-{index}@example.invalid>"))
+        )
     writer.flush()
 
     assert len(writer.parts) > 1
@@ -76,4 +79,4 @@ def test_part_writer_produces_valid_bounded_files(
         else:
             lines = path.read_text(encoding="utf-8").splitlines()
             assert lines
-            assert all(json.loads(line)["record_type"] == "email_message" for line in lines)
+            assert all("body" in json.loads(line) for line in lines)

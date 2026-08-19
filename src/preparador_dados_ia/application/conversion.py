@@ -16,6 +16,7 @@ from preparador_dados_ia.converters.email import message_to_record
 from preparador_dados_ia.core.cancellation import CancellationToken, ConversionCancelled
 from preparador_dados_ia.core.cleaning import UnicodeSanitizer, sanitize_record
 from preparador_dados_ia.core.partitioning import PartitionLimits, split_oversized_record
+from preparador_dados_ia.outputs.ai_ready import compact_email_record
 from preparador_dados_ia.outputs.artifacts import write_readme, write_report
 from preparador_dados_ia.outputs.parts import OutputFormat, PartWriter
 
@@ -125,7 +126,7 @@ def convert_mbox(
                         for item in records
                     ]
                 for item in records:
-                    writer.add(item)
+                    writer.add(compact_email_record(item))
                 converted += 1
             except Exception as error:
                 failed += 1
@@ -166,7 +167,6 @@ def convert_mbox(
         "duration_seconds": max(0.0, (finished_at - started_at).total_seconds()),
         "sources": [
             {
-                "absolute_path": str(input_path),
                 "file_name": input_path.name,
                 "size_bytes": source_stat.st_size,
                 "modified_at": datetime.fromtimestamp(

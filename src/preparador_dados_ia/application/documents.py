@@ -77,6 +77,8 @@ def convert_document(
     word_suspicious_text_sequences = 0
     word_inferred_headings = 0
     word_inferred_table_headers = 0
+    document_metadata: dict[str, object] = {}
+    pdf_catalog: dict[str, object] = {}
     errors: list[dict[str, object]] = []
     cancelled = False
     notify_progress(progress_callback, "preparing", 0, 1)
@@ -103,6 +105,10 @@ def convert_document(
             data = sanitized.get("data")
             processing = sanitized.get("processing")
             if isinstance(data, dict):
+                document_metadata = {
+                    "title": data.get("title"),
+                    "author": data.get("author"),
+                }
                 encoding_value = data.get("encoding")
                 encoding = str(encoding_value) if encoding_value else encoding
                 headings = data.get("headings")
@@ -124,6 +130,12 @@ def convert_document(
                     pdf_outline_count += _outline_item_count(outline)
                 embedded_files = data.get("embedded_files")
                 images = data.get("images")
+                if converter.record_type == "pdf_document":
+                    pdf_catalog = {
+                        "outline": outline or [],
+                        "embedded_files": embedded_files or [],
+                        "images": images or [],
+                    }
                 embedded_file_count += (
                     len(embedded_files) if isinstance(embedded_files, list) else 0
                 )
@@ -206,7 +218,6 @@ def convert_document(
         "duration_seconds": max(0.0, (finished_at - started_at).total_seconds()),
         "sources": [
             {
-                "absolute_path": str(input_path),
                 "file_name": input_path.name,
                 "size_bytes": source_stat.st_size,
                 "modified_at": datetime.fromtimestamp(source_stat.st_mtime, tz=UTC).isoformat(),
@@ -238,6 +249,8 @@ def convert_document(
     }
 
     if converter.record_type == "pdf_document":
+        report["document_metadata"] = document_metadata
+        report["pdf_catalog"] = pdf_catalog
         report["pdf_extraction"] = {
             "page_count": pdf_page_count,
             "pages_with_text": pdf_pages_with_text,
@@ -254,6 +267,7 @@ def convert_document(
             "external_references_downloaded": False,
         }
     elif converter.record_type == "word_document":
+        report["document_metadata"] = document_metadata
         report["word_extraction"] = {
             "block_count": word_block_count,
             "paragraphs": word_paragraph_count,
@@ -276,6 +290,7 @@ def convert_document(
             "external_references_downloaded": False,
         }
     else:
+        report["document_metadata"] = document_metadata
         report["text_extraction"] = {
             "encoding": encoding,
             "headings_detected": heading_count,

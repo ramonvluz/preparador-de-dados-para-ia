@@ -42,7 +42,11 @@ def test_xlsx_conversion_generates_json_and_auditable_report(tmp_path: Path) -> 
     assert report["spreadsheet_extraction"]["external_links_followed"] is False
     part = output / "PRONTO_PARA_IA" / report["parts"][0]["file"]
     records = json.loads(part.read_text(encoding="utf-8"))
-    assert records[0]["record_type"] == "spreadsheet_workbook"
+    assert records[0]["source"] == source.name
+    assert records[0]["sheet"] == "Dados"
+    assert records[0]["columns"] == ["C\u00f3digo", "Valor", "Dobro"]
+    assert records[0]["formulas"][0]["cell"] == "C2"
+    assert "record_type" not in records[0]
     assert "Tipo identificado: XLSX" in (output / "LEIA-ME.txt").read_text(encoding="utf-8")
 
 
@@ -60,6 +64,5 @@ def test_xlsx_api_profile_generates_jsonl(tmp_path: Path) -> None:
     assert report["output_format"] == "jsonl"
     part = output / "PRONTO_PARA_IA" / report["parts"][0]["file"]
     assert all(
-        json.loads(line)["record_type"] == "spreadsheet_workbook"
-        for line in part.read_text(encoding="utf-8").splitlines()
+        "sheet" in json.loads(line) for line in part.read_text(encoding="utf-8").splitlines()
     )

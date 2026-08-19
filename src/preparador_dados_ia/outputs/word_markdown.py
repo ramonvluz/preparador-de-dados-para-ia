@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 
@@ -101,7 +100,7 @@ def _word_units(record: dict[str, object]) -> list[_WordUnit]:
     ):
         raise TypeError("O contrato Word não contém blocos válidos")
 
-    units = [_WordUnit(kind="catalog", text=_catalog_markdown(data, processing))]
+    units: list[_WordUnit] = []
     list_lines: list[str] = []
     list_start: int | None = None
 
@@ -160,41 +159,6 @@ def _word_units(record: dict[str, object]) -> list[_WordUnit]:
         )
     flush_list(len(data["blocks"]) - 1)
     return units
-
-
-def _catalog_markdown(
-    data: dict[str, object],
-    processing: dict[str, object],
-) -> str:
-    title = str(data.get("title") or "Documento Word")
-    author = str(data.get("author") or "não informado")
-    blocks = data.get("blocks")
-    sections = data.get("sections")
-    block_count = len(blocks) if isinstance(blocks, list) else 0
-    section_count = len(sections) if isinstance(sections, list) else 0
-    lines = [
-        "## Catálogo do documento Word",
-        "",
-        f"- Título: {title}",
-        f"- Autor: {author}",
-        f"- Blocos estruturais: {block_count}",
-        f"- Seções detectadas: {section_count}",
-    ]
-    suspicious_sequences = int(processing.get("suspicious_text_sequences", 0) or 0)
-    if suspicious_sequences:
-        lines.extend(
-            [
-                "",
-                "### Aviso de qualidade do texto",
-                "",
-                (
-                    f"- Foram detectadas {suspicious_sequences} sequência(s) de caracteres "
-                    "suspeita(s) no documento de origem. O texto foi preservado sem "
-                    "reconstrução automática e deve ser revisado."
-                ),
-            ]
-        )
-    return "\n".join(lines)
 
 
 def _list_item_markdown(block: dict[str, object]) -> str:
@@ -373,64 +337,32 @@ def _render_part(
     ):
         raise TypeError("Envelope Word incompleto")
 
-    starts = [unit.block_start for unit in units if unit.block_start is not None]
-    ends = [unit.block_end for unit in units if unit.block_end is not None]
-    segmented = any(unit.segment_count is not None for unit in units)
-    warnings = list(processing.get("warnings") or [])
-    if segmented:
-        warnings.append("oversized_word_unit_segmented")
-    metadata: list[tuple[str, object]] = [
-        ("schema_version", record.get("schema_version")),
-        ("record_type", record.get("record_type")),
-        ("record_id", record.get("record_id")),
-        ("source_file", source.get("file_name")),
-        ("source_type", source.get("file_type")),
-        ("source_size_bytes", source.get("size_bytes")),
-        ("title", data.get("title")),
-        ("author", data.get("author")),
-        ("total_block_count", len(data.get("blocks") or [])),
-        ("section_count", len(data.get("sections") or [])),
-        ("block_start", min(starts) if starts else None),
-        ("block_end", max(ends) if ends else None),
-        ("part_number", part_number),
-        ("part_count", part_count),
-        ("converted_at", processing.get("converted_at")),
-        ("unicode_cleaned", processing.get("unicode_cleaned")),
-        ("images_omitted", processing.get("images_omitted", 0)),
-        ("headers_footers_omitted", processing.get("headers_footers_omitted", False)),
-        ("features_omitted", processing.get("features_omitted", [])),
-        (
-            "suspicious_text_sequences",
-            processing.get("suspicious_text_sequences", 0),
-        ),
-        ("inferred_headings", processing.get("inferred_headings", 0)),
-        ("inferred_table_headers", processing.get("inferred_table_headers", 0)),
-        ("warnings", warnings),
-    ]
-    header = "\n".join(f"{key}: {_yaml_scalar(value)}" for key, value in metadata)
+    provenance = f"> Fonte: {source.get('file_name') or 'não informada'}"
+    if part_count > 1:
+        provenance += f" — parte {part_number}/{part_count}"
+
+    omissions: list[str] = []
+    image_count = int(processing.get("images_omitted", 0) or 0)
+    if image_count:
+        omissions.append(f"{image_count} imagem(ns) não extraída(s)")
+    if processing.get("headers_footers_omitted"):
+        omissions.append("cabeçalhos e rodapés não extraídos")
+    features = processing.get("features_omitted")
+    if isinstance(features, list) and features:
+        omissions.append("recursos avançados não extraídos")
+    suspicious = int(processing.get("suspicious_text_sequences", 0) or 0)
+    if suspicious:
+        omissions.append(f"{suspicious} sequência(s) de texto suspeita(s)")
+
+    note_line = f"\n> {'; '.join(omissions)}." if omissions else ""
     body = "\n\n".join(_render_unit(unit) for unit in units)
-    return f"---\n{header}\n---\n\n{body.rstrip()}\n"
+    return f"{provenance}{note_line}\n\n{body.rstrip()}\n"
 
 
 def _render_unit(unit: _WordUnit) -> str:
-    segment = (
-        f" segment={unit.segment_number}/{unit.segment_count}"
-        if unit.segment_number is not None and unit.segment_count is not None
-        else ""
-    )
-    if unit.kind == "catalog":
-        return f"<!-- PREPARADOR_WORD_CATALOG{segment} -->\n\n{unit.text.rstrip()}"
-    start = unit.block_start if unit.block_start is not None else 0
-    end = unit.block_end if unit.block_end is not None else start
-    return (
-        f"<!-- PREPARADOR_WORD_BLOCK_START start={start} end={end}{segment} -->\n\n"
-        f"{unit.text.rstrip()}\n\n"
-        f"<!-- PREPARADOR_WORD_BLOCK_END start={start} end={end}{segment} -->"
-    )
-
-
-def _yaml_scalar(value: object) -> str:
-    return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
+    if unit.segment_number is not None and unit.segment_count is not None:
+        return f"_Trecho {unit.segment_number}/{unit.segment_count}._\n\n{unit.text.rstrip()}"
+    return unit.text.rstrip()
 
 
 def _fits(content: str, limits: PartitionLimits) -> bool:

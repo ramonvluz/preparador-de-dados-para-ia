@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 
@@ -96,7 +95,7 @@ def _pdf_units(record: dict[str, object]) -> list[_PdfUnit]:
     if not isinstance(data, dict) or not isinstance(data.get("pages"), list):
         raise TypeError("O contrato PDF não contém páginas válidas")
 
-    units = [_PdfUnit(kind="catalog", text=_catalog_markdown(data))]
+    units: list[_PdfUnit] = []
     for page in data["pages"]:
         if not isinstance(page, dict):
             raise TypeError("Página PDF inválida")
@@ -114,94 +113,6 @@ def _pdf_units(record: dict[str, object]) -> list[_PdfUnit]:
             )
         )
     return units
-
-
-def _catalog_markdown(data: dict[str, object]) -> str:
-    lines: list[str] = []
-    title = data.get("title")
-    if title:
-        lines.extend([f"# {title}", ""])
-    lines.extend(
-        [
-            "## Catálogo do PDF",
-            "",
-            f"- Autor: {data.get('author') or 'não informado'}",
-            f"- Total de páginas: {data.get('page_count', 0)}",
-        ]
-    )
-
-    outline = data.get("outline")
-    if isinstance(outline, list) and outline:
-        lines.extend(["", "### Sumário", ""])
-        _outline_markdown(outline, lines, 0)
-
-    embedded_files = data.get("embedded_files")
-    if isinstance(embedded_files, list) and embedded_files:
-        lines.extend(
-            [
-                "",
-                "### Arquivos incorporados",
-                "",
-                "| Arquivo | Tipo | Tamanho (bytes) |",
-                "|---|---|---:|",
-            ]
-        )
-        for item in embedded_files:
-            if isinstance(item, dict):
-                lines.append(
-                    "| "
-                    + " | ".join(
-                        [
-                            _table_cell(item.get("file_name")),
-                            _table_cell(item.get("media_type") or "não informado"),
-                            _table_cell(item.get("size_bytes") or "não informado"),
-                        ]
-                    )
-                    + " |"
-                )
-
-    images = data.get("images")
-    if isinstance(images, list) and images:
-        lines.extend(
-            [
-                "",
-                "### Imagens catalogadas",
-                "",
-                "| Página | Imagem | Tipo | Dimensões |",
-                "|---:|---:|---|---|",
-            ]
-        )
-        for image in images:
-            if not isinstance(image, dict):
-                continue
-            width = image.get("width")
-            height = image.get("height")
-            dimensions = f"{width} x {height}" if width and height else "não informadas"
-            lines.append(
-                "| "
-                + " | ".join(
-                    [
-                        _table_cell(image.get("page_number")),
-                        _table_cell(image.get("image_number")),
-                        _table_cell(image.get("media_type") or "não informado"),
-                        _table_cell(dimensions),
-                    ]
-                )
-                + " |"
-            )
-    return "\n".join(lines).strip()
-
-
-def _outline_markdown(items: list[object], lines: list[str], level: int) -> None:
-    for item in items:
-        if not isinstance(item, dict):
-            continue
-        page = item.get("page_number")
-        page_label = f" (página {page})" if page else ""
-        lines.append(f"{'  ' * level}- {item.get('title', '')}{page_label}")
-        children = item.get("children")
-        if isinstance(children, list):
-            _outline_markdown(children, lines, level + 1)
 
 
 def _split_unit(
@@ -277,74 +188,51 @@ def _render_part(
 ) -> str:
     source = record.get("source")
     data = record.get("data")
-    processing = record.get("processing")
-    if (
-        not isinstance(source, dict)
-        or not isinstance(data, dict)
-        or not isinstance(processing, dict)
-    ):
+    if not isinstance(source, dict) or not isinstance(data, dict):
         raise TypeError("Envelope PDF incompleto")
 
     pages = [unit.page_number for unit in units if unit.page_number is not None]
-    segmented = any(unit.segment_count is not None for unit in units)
-    warnings = list(processing.get("warnings") or [])
-    if segmented:
-        warnings.append("oversized_pdf_unit_segmented")
-    metadata: list[tuple[str, object]] = [
-        ("schema_version", record.get("schema_version")),
-        ("record_type", record.get("record_type")),
-        ("record_id", record.get("record_id")),
-        ("source_file", source.get("file_name")),
-        ("source_type", source.get("file_type")),
-        ("source_size_bytes", source.get("size_bytes")),
-        ("title", data.get("title")),
-        ("author", data.get("author")),
-        ("total_page_count", data.get("page_count")),
-        ("page_start", min(pages) if pages else None),
-        ("page_end", max(pages) if pages else None),
-        ("part_number", part_number),
-        ("part_count", part_count),
-        ("converted_at", processing.get("converted_at")),
-        ("unicode_cleaned", processing.get("unicode_cleaned")),
-        ("ocr_applied", processing.get("ocr_applied")),
-        ("embedded_files_count", len(data.get("embedded_files") or [])),
-        ("images_count", len(data.get("images") or [])),
-        ("warnings", warnings),
-    ]
-    header = "\n".join(f"{key}: {_yaml_scalar(value)}" for key, value in metadata)
+    provenance = f"> Fonte: {source.get('file_name') or 'não informada'}"
+    if part_count > 1:
+        provenance += f" — parte {part_number}/{part_count}"
+
+    notes: list[str] = []
+    if pages:
+        notes.append(f"Páginas {min(pages)}–{max(pages)}")
+    page_set = set(pages)
+    images = data.get("images")
+    image_count = (
+        sum(
+            1
+            for image in images
+            if isinstance(image, dict) and image.get("page_number") in page_set
+        )
+        if isinstance(images, list)
+        else 0
+    )
+    if image_count:
+        notes.append(f"{image_count} imagem(ns) não extraída(s)")
+    embedded_count = len(data.get("embedded_files") or [])
+    if embedded_count:
+        notes.append(f"{embedded_count} arquivo(s) incorporado(s) não extraído(s)")
+
+    note_line = f"\n> {'; '.join(notes)}." if notes else ""
     body = "\n\n".join(_render_unit(unit) for unit in units)
-    return f"---\n{header}\n---\n\n{body.rstrip()}\n"
+    return f"{provenance}{note_line}\n\n{body.rstrip()}\n"
 
 
 def _render_unit(unit: _PdfUnit) -> str:
+    page_number = unit.page_number or 0
     segment = (
-        f" segment={unit.segment_number}/{unit.segment_count}"
+        f" — trecho {unit.segment_number}/{unit.segment_count}"
         if unit.segment_number is not None and unit.segment_count is not None
         else ""
     )
-    if unit.kind == "catalog":
-        return f"<!-- PREPARADOR_PDF_CATALOG{segment} -->\n\n{unit.text.rstrip()}"
-
-    page_number = unit.page_number or 0
     if unit.text.strip():
         content = unit.text.strip()
     else:
         content = "_Nenhum texto incorporado foi extraído desta página. OCR não foi aplicado._"
-    return (
-        f"<!-- PREPARADOR_PAGE_START page={page_number}{segment} -->\n\n"
-        f"## Página {page_number}\n\n"
-        f"_Método de extração: `{unit.extraction_method}`._\n\n"
-        f"{content}\n\n"
-        f"<!-- PREPARADOR_PAGE_END page={page_number}{segment} -->"
-    )
-
-
-def _yaml_scalar(value: object) -> str:
-    return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
-
-
-def _table_cell(value: object) -> str:
-    return str(value).replace("|", "\\|").replace("\n", " ")
+    return f"## Página {page_number}{segment}\n\n{content}"
 
 
 def _fits(content: str, limits: PartitionLimits) -> bool:

@@ -94,9 +94,7 @@ class PartWriter:
         atomic_write_text(path, content)
 
         dates = sorted(
-            str(record["data"]["date"])
-            for record, _ in self._records
-            if isinstance(record.get("data"), dict) and record["data"].get("date") is not None
+            date for record, _ in self._records if (date := _record_date(record)) is not None
         )
         size_bytes = path.stat().st_size
         self.parts.append(
@@ -111,3 +109,11 @@ class PartWriter:
         )
         self._records = []
         self._current_bytes = 2 if self.output_format is OutputFormat.JSON else 0
+
+
+def _record_date(record: dict[str, object]) -> str | None:
+    value = record.get("date")
+    if value is None:
+        data = record.get("data")
+        value = data.get("date") if isinstance(data, dict) else None
+    return str(value) if value is not None else None

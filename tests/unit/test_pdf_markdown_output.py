@@ -32,13 +32,12 @@ def test_pdf_markdown_preserves_explicit_page_boundaries(tmp_path: Path) -> None
     output = (tmp_path / writer.parts[0].file).read_text(encoding="utf-8")
     assert segments == 1
     assert oversized is False
-    assert "<!-- PREPARADOR_PDF_CATALOG -->" in output
-    assert "<!-- PREPARADOR_PAGE_START page=1 -->" in output
-    assert "<!-- PREPARADOR_PAGE_END page=1 -->" in output
-    assert "<!-- PREPARADOR_PAGE_START page=2 -->" in output
+    assert output.startswith("> Fonte: relatorio.pdf\n> Páginas 1–2.")
+    assert "## Página 1" in output
+    assert "## Página 2" in output
     assert "OCR não foi aplicado" in output
-    assert "page_start: 1" in output
-    assert "page_end: 2" in output
+    assert "PREPARADOR_" not in output
+    assert "schema_version" not in output
 
 
 def test_oversized_pdf_page_is_segmented_into_bounded_parts(tmp_path: Path) -> None:
@@ -55,8 +54,7 @@ def test_oversized_pdf_page_is_segmented_into_bounded_parts(tmp_path: Path) -> N
         path = tmp_path / part.file
         output = path.read_text(encoding="utf-8")
         assert path.stat().st_size <= limits.max_bytes
-        if "PREPARADOR_PAGE_START" in output:
+        if "## Página 1" in output:
             page_parts += 1
-            assert "segment=" in output
-            assert "PREPARADOR_PAGE_END" in output
+            assert "trecho" in output
     assert page_parts > 1

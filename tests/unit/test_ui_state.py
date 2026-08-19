@@ -56,13 +56,13 @@ def test_desktop_request_rejects_unsupported_extension(tmp_path: Path) -> None:
         request.validate()
 
 
-def test_pdf_source_recommends_markdown_with_page_markers(tmp_path: Path) -> None:
+def test_pdf_source_recommends_markdown_with_page_titles(tmp_path: Path) -> None:
     source = tmp_path / "artificial.pdf"
 
     recommendation = recommendation_for(UiProfile.PLATFORM, source)
 
     assert recommendation.format_name == "Markdown com páginas"
-    assert "marcadores explícitos" in recommendation.explanation
+    assert "títulos de página" in recommendation.explanation
 
 
 def test_word_source_recommends_structured_markdown(tmp_path: Path) -> None:

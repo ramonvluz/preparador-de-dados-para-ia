@@ -11,6 +11,7 @@ from preparador_dados_ia.converters.base import ConversionContext, RecordConvert
 from preparador_dados_ia.core.cancellation import CancellationToken, ConversionCancelled
 from preparador_dados_ia.core.cleaning import UnicodeSanitizer, sanitize_record
 from preparador_dados_ia.core.partitioning import PartitionLimits, record_metrics
+from preparador_dados_ia.outputs.ai_ready import compact_tabular_record
 from preparador_dados_ia.outputs.artifacts import (
     write_report,
     write_spreadsheet_readme,
@@ -62,6 +63,7 @@ def convert_tabular(
     warnings: set[str] = set()
     errors: list[dict[str, object]] = []
     seen_datasets: set[tuple[object, ...]] = set()
+    dataset_catalog: list[dict[str, object]] = []
     dataset_segment_counts: dict[tuple[object, ...], int] = {}
     seen_sheets: set[object] = set()
     cancelled = False
@@ -113,6 +115,22 @@ def convert_tabular(
                 if isinstance(dataset, dict) and dataset_key not in seen_datasets:
                     seen_datasets.add(dataset_key)
                     total_rows += int(dataset.get("total_rows", 0) or 0)
+                    catalog_entry: dict[str, object] = {
+                        "name": dataset.get("name"),
+                        "source_kind": dataset.get("source_kind"),
+                        "reference": dataset.get("reference"),
+                        "has_header": dataset.get("has_header"),
+                        "total_rows": dataset.get("total_rows"),
+                        "columns": dataset.get("columns") or [],
+                    }
+                    if isinstance(sheet, dict):
+                        catalog_entry["sheet"] = {
+                            "index": sheet.get("index"),
+                            "name": sheet.get("name"),
+                            "visibility": sheet.get("visibility"),
+                            "used_range": sheet.get("used_range"),
+                        }
+                    dataset_catalog.append(catalog_entry)
                     if dataset.get("source_kind") == "excel_table":
                         table_count += 1
                 formulas = data.get("formulas")
@@ -136,13 +154,14 @@ def convert_tabular(
                     hidden_rows += int(processing.get("hidden_rows", 0) or 0)
                     hidden_columns += int(processing.get("hidden_columns", 0) or 0)
 
-            _, record_bytes, record_tokens = record_metrics(sanitized)
+            ready_record = compact_tabular_record(sanitized)
+            _, record_bytes, record_tokens = record_metrics(ready_record)
             if record_bytes > writer.single_record_limits.max_bytes or (
                 record_tokens > writer.single_record_limits.max_tokens
             ):
                 oversized += 1
                 warnings.add("tabular_segment_exceeds_configured_limit")
-            writer.add(sanitized)
+            writer.add(ready_record)
             segment_count += 1
     except ConversionCancelled:
         cancelled = True
@@ -180,7 +199,6 @@ def convert_tabular(
         "duration_seconds": max(0.0, (finished_at - started_at).total_seconds()),
         "sources": [
             {
-                "absolute_path": str(input_path),
                 "file_name": input_path.name,
                 "size_bytes": source_stat.st_size,
                 "modified_at": datetime.fromtimestamp(source_stat.st_mtime, tz=UTC).isoformat(),
@@ -204,6 +222,7 @@ def convert_tabular(
         "segmented_records": sum(count > 1 for count in dataset_segment_counts.values()),
         "oversized_records": oversized,
         "warnings_count": len(warnings),
+        "dataset_catalog": dataset_catalog,
         "unicode_cleanup": sanitizer.report(),
         "parts": parts,
         "errors": errors,
