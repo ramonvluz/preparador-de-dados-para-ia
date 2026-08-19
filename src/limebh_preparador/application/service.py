@@ -6,6 +6,8 @@ from pathlib import Path
 from limebh_preparador.application.conversion import ConversionSettings, convert_mbox
 from limebh_preparador.application.documents import convert_document
 from limebh_preparador.application.progress import ProgressCallback
+from limebh_preparador.application.tabular import convert_tabular
+from limebh_preparador.converters.csv import CsvDatasetConverter
 from limebh_preparador.converters.pdf import PdfDocumentConverter
 from limebh_preparador.converters.registry import ConverterRegistry
 from limebh_preparador.converters.text import TextDocumentConverter
@@ -15,14 +17,16 @@ from limebh_preparador.core.cancellation import CancellationToken
 MBOX_EXTENSION = ".mbox"
 PDF_EXTENSION = ".pdf"
 DOCX_EXTENSION = ".docx"
+CSV_EXTENSION = ".csv"
 TEXT_EXTENSIONS = TextDocumentConverter.supported_extensions
 SUPPORTED_SOURCE_EXTENSIONS = frozenset(
-    {MBOX_EXTENSION, PDF_EXTENSION, DOCX_EXTENSION, *TEXT_EXTENSIONS}
+    {MBOX_EXTENSION, PDF_EXTENSION, DOCX_EXTENSION, CSV_EXTENSION, *TEXT_EXTENSIONS}
 )
 
 
 def build_default_registry() -> ConverterRegistry:
     registry = ConverterRegistry()
+    registry.register(CsvDatasetConverter())
     registry.register(TextDocumentConverter())
     registry.register(PdfDocumentConverter())
     registry.register(WordDocumentConverter())
@@ -50,6 +54,8 @@ def convert_source(
 
     registry = build_default_registry()
     converter = registry.resolve(input_path)
+    if converter.record_type == "tabular_dataset":
+        return convert_tabular(input_path, output_dir, converter=converter, **common)
     return convert_document(
         input_path,
         output_dir,
@@ -71,6 +77,8 @@ def source_format_id(path: Path) -> str:
         return "pdf"
     if suffix == ".docx":
         return "docx"
+    if suffix == ".csv":
+        return "csv"
     return suffix.removeprefix(".") or "unknown"
 
 
@@ -81,6 +89,7 @@ def source_format_label(path: Path) -> str:
         "markdown": "Markdown",
         "pdf": "PDF",
         "docx": "DOCX",
+        "csv": "CSV",
     }.get(source_format_id(path), "Desconhecido")
 
 
@@ -91,4 +100,6 @@ def source_unit_label(path: Path, *, plural: bool = False) -> str:
         return "páginas" if plural else "página"
     if path.suffix.lower() == DOCX_EXTENSION:
         return "blocos" if plural else "bloco"
+    if path.suffix.lower() == CSV_EXTENSION:
+        return "linhas" if plural else "linha"
     return "documentos" if plural else "documento"

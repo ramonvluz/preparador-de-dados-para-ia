@@ -59,6 +59,52 @@ def write_report(output_dir: Path, report: dict[str, object]) -> Path:
     return path
 
 
+def write_tabular_readme(
+    output_dir: Path,
+    *,
+    source_name: str,
+    converted_rows: int,
+    column_count: int,
+    part_count: int,
+    encoding: str | None,
+    output_format: OutputFormat,
+    cancelled: bool,
+) -> Path:
+    status_line = (
+        "A conversão foi cancelada com segurança; somente partes completas foram mantidas."
+        if cancelled
+        else "A conversão foi concluída."
+    )
+    lines = [
+        "PREPARADOR DE DADOS PARA IA — LIMEBH",
+        "",
+        status_line,
+        f"Fonte: {source_name}",
+        "Tipo identificado: CSV",
+        f"Codificação identificada: {encoding or 'não identificada'}",
+        f"Linhas convertidas: {converted_rows}",
+        f"Colunas identificadas: {column_count}",
+        f"Partes geradas: {part_count}",
+        f"Formato: {output_format.value.upper()}",
+        "",
+        "COMO USAR",
+        "Envie os arquivos da pasta PRONTO_PARA_IA em ordem numérica.",
+        "Cada registro informa colunas, tipos e o intervalo de linhas da fonte.",
+        "",
+        "O QUE ESTÁ INCLUÍDO",
+        "Cabeçalhos normalizados, valores tipados, dialeto e codificação do CSV.",
+        "",
+        "PRIVACIDADE",
+        (
+            "A saída pode conter dados pessoais. Compartilhe apenas com pessoas "
+            "e serviços autorizados."
+        ),
+    ]
+    path = output_dir / "LEIA-ME.txt"
+    atomic_write_text(path, "\n".join(lines) + "\n")
+    return path
+
+
 def write_document_readme(
     output_dir: Path,
     *,

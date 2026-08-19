@@ -57,3 +57,16 @@ def test_cli_dispatches_word_sources_to_structured_markdown(
     assert exit_code == 0
     assert "blocos" in captured.out
     assert list((output / "PRONTO_PARA_IA").glob("*.md"))
+
+
+def test_cli_dispatches_csv_sources_to_tabular_json(tmp_path: Path, capsys: object) -> None:
+    source = tmp_path / "dados.csv"
+    source.write_text("Código,Valor\n1,10\n2,20\n", encoding="utf-8")
+    output = tmp_path / "csv_cli"
+
+    exit_code = main([str(source), "--output", str(output)])
+
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert "2/2 linhas" in captured.out
+    assert list((output / "PRONTO_PARA_IA").glob("*.json"))

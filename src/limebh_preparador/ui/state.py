@@ -32,6 +32,21 @@ def recommendation_for(
     profile: UiProfile,
     source: Path | None = None,
 ) -> FormatRecommendation:
+    if source is not None and source.suffix.lower() == ".csv":
+        if profile is UiProfile.API:
+            return FormatRecommendation(
+                format_name="JSONL tabular",
+                explanation=(
+                    "Linhas e colunas tipadas em registros independentes, adequados "
+                    "para pipelines técnicos e busca semântica."
+                ),
+            )
+        return FormatRecommendation(
+            format_name="JSON tabular",
+            explanation=(
+                "Cabeçalhos, tipos e intervalos de linhas preservados em partes numeradas."
+            ),
+        )
     if source is not None and source.suffix.lower() == ".docx":
         return FormatRecommendation(
             format_name="Markdown estruturado",
@@ -83,7 +98,7 @@ class DesktopConversionRequest:
         if not self.source.is_file():
             raise FileNotFoundError(f"Arquivo não encontrado: {self.source}")
         if self.source.suffix.lower() not in SUPPORTED_SOURCE_EXTENSIONS:
-            raise ValueError("Selecione um arquivo MBOX, TXT, Markdown, PDF ou DOCX.")
+            raise ValueError("Selecione um arquivo MBOX, TXT, Markdown, PDF, DOCX ou CSV.")
         if self.output_root.exists() and not self.output_root.is_dir():
             raise NotADirectoryError(f"O destino selecionado não é uma pasta: {self.output_root}")
 

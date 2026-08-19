@@ -96,3 +96,22 @@ def test_worker_dispatches_word_and_reports_structural_blocks(tmp_path: Path) ->
     assert finished.report["word_extraction"]["block_count"] == 18
     assert any(event.progress.stage == "converting" for event in progress)
     assert list((finished.output_dir / "PRONTO_PARA_IA").glob("*.md"))
+
+
+def test_worker_dispatches_csv_and_reports_rows(tmp_path: Path) -> None:
+    source = tmp_path / "dados.csv"
+    source.write_text("Código,Valor\n1,10\n2,20\n", encoding="utf-8")
+    worker = ConversionWorker()
+    request = DesktopConversionRequest(source=source, output_root=tmp_path)
+
+    worker.start(request)
+    worker.wait(timeout=10)
+    events = _drain_events(worker)
+
+    finished = next(event for event in events if isinstance(event, WorkerFinished))
+    progress = [event for event in events if isinstance(event, WorkerProgress)]
+    assert worker.is_active is False
+    assert finished.report["converted_records"] == 2
+    assert finished.report["tabular_extraction"]["columns"] == 2
+    assert any(event.progress.current == 2 for event in progress)
+    assert list((finished.output_dir / "PRONTO_PARA_IA").glob("*.json"))

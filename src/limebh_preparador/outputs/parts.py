@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from dataclasses import asdict, dataclass
 from enum import StrEnum
 from pathlib import Path
@@ -38,6 +39,7 @@ class PartWriter:
         output_dir: Path,
         limits: PartitionLimits,
         output_format: OutputFormat,
+        filename_prefix: str = "emails",
     ) -> None:
         wrapper_bytes = 2 if output_format is OutputFormat.JSON else 1
         if limits.max_bytes <= wrapper_bytes or limits.max_tokens <= 1:
@@ -45,6 +47,9 @@ class PartWriter:
         self.output_dir = output_dir
         self.limits = limits
         self.output_format = output_format
+        if re.fullmatch(r"[a-z0-9_]+", filename_prefix) is None:
+            raise ValueError("O prefixo das partes contém caracteres inválidos")
+        self.filename_prefix = filename_prefix
         self._records: list[tuple[dict[str, object], str]] = []
         self._current_bytes = 2 if output_format is OutputFormat.JSON else 0
         self.parts: list[PartInfo] = []
@@ -80,7 +85,7 @@ class PartWriter:
         if not self._records:
             return
         suffix = self.output_format.value
-        filename = f"emails_parte_{len(self.parts) + 1:04d}.{suffix}"
+        filename = f"{self.filename_prefix}_parte_{len(self.parts) + 1:04d}.{suffix}"
         path = self.output_dir / filename
         if self.output_format is OutputFormat.JSON:
             content = "[" + ",".join(item[1] for item in self._records) + "]"

@@ -52,7 +52,7 @@ def test_desktop_request_rejects_unsupported_extension(tmp_path: Path) -> None:
     source.write_text("artificial", encoding="utf-8")
     request = DesktopConversionRequest(source=source, output_root=tmp_path)
 
-    with pytest.raises(ValueError, match="MBOX, TXT, Markdown, PDF ou DOCX"):
+    with pytest.raises(ValueError, match="MBOX, TXT, Markdown, PDF, DOCX ou CSV"):
         request.validate()
 
 
@@ -72,6 +72,26 @@ def test_word_source_recommends_structured_markdown(tmp_path: Path) -> None:
 
     assert recommendation.format_name == "Markdown estruturado"
     assert "tabelas simples" in recommendation.explanation
+
+
+def test_csv_source_recommends_profile_specific_tabular_format(tmp_path: Path) -> None:
+    source = tmp_path / "artificial.csv"
+
+    platform = recommendation_for(UiProfile.PLATFORM, source)
+    api = recommendation_for(UiProfile.API, source)
+
+    assert platform.format_name == "JSON tabular"
+    assert api.format_name == "JSONL tabular"
+
+
+def test_desktop_request_accepts_csv_and_ignores_html(tmp_path: Path) -> None:
+    source = tmp_path / "artificial.csv"
+    source.write_text("Código,Valor\n1,10\n", encoding="utf-8")
+    request = DesktopConversionRequest(source=source, output_root=tmp_path, include_html=True)
+
+    request.validate()
+
+    assert request.settings.include_html is False
 
 
 @pytest.mark.parametrize("suffix", [".txt", ".md", ".markdown"])
