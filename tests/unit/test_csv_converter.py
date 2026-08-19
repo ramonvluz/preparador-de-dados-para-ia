@@ -57,7 +57,8 @@ def test_csv_converter_detects_dialect_types_and_normalizes_ragged_rows(
     ]
     rows = record["data"]["dataset"]["rows"]
     assert rows[0] == ["001", "Empresa Exemplo", 1250.5, True, "2026-08-01"]
-    assert rows[2] == [3, "Órgão Público", 980.0, True, None]
+    assert rows[2] == ["3", "Órgão Público", 980.0, True, None]
+    assert record["data"]["dataset"]["columns"][0]["inferred_type"] == "string"
     assert record["processing"]["ragged_rows"] == 1
     assert record["processing"]["blank_rows_skipped"] == 1
 
@@ -84,3 +85,21 @@ def test_csv_without_header_generates_stable_column_names(tmp_path: Path) -> Non
     assert dataset["has_header"] is False
     assert [column["name"] for column in dataset["columns"]] == ["coluna_1", "coluna_2"]
     assert dataset["rows"][0] == [1, 10]
+
+
+def test_csv_mixed_text_column_preserves_numeric_and_boolean_looking_values(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "titulos.csv"
+    source.write_text(
+        "Título,Ano\nFilme A,2024\n1922,1922\n46,2020\nNo,2021\n",
+        encoding="utf-8",
+    )
+
+    record = next(CsvDatasetConverter().convert(_context(source)))
+
+    dataset = record["data"]["dataset"]
+    assert dataset["columns"][0]["inferred_type"] == "string"
+    assert dataset["columns"][1]["inferred_type"] == "integer"
+    assert [row[0] for row in dataset["rows"]] == ["Filme A", "1922", "46", "No"]
+    assert [row[1] for row in dataset["rows"]] == [2024, 1922, 2020, 2021]

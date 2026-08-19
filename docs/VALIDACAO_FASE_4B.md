@@ -21,6 +21,8 @@ adotada pelo projeto. Ele:
 - identifica automaticamente a presença de cabeçalho;
 - cria nomes estáveis e exclusivos para colunas;
 - preserva identificadores com zeros à esquerda como texto;
+- preserva como texto toda coluna CSV que misture texto com valores numéricos,
+  booleanos ou temporais, evitando alterar títulos, códigos e rótulos;
 - reconhece booleanos, inteiros, números decimais e valores temporais ISO;
 - preenche células ausentes em linhas irregulares com `null`;
 - ignora linhas completamente vazias e registra a ocorrência no relatório;
@@ -42,7 +44,7 @@ conhecida do produto: `PRONTO_PARA_IA`, `LEIA-ME.txt` e
 Os testes artificiais verificam dialeto, cabeçalho, tipos, valores nulos,
 acentuação, limpeza de caracteres invisíveis, linhas vazias e irregulares,
 segmentação, JSON, JSONL, CLI e recomendações da interface.
-A suíte completa passou com 91 testes, além da análise estática, verificação de
+A suíte completa passou com 92 testes, além da análise estática, verificação de
 formatação e compilação dos módulos.
 
 ## Fora do escopo

@@ -65,13 +65,23 @@ def parse_csv_source(
         [sanitizer.clean(value).strip() for value in row[:width]] for row in padded_rows
     ]
     typed_rows = [[_parse_value(value, dialect.delimiter) for value in row] for row in cleaned_rows]
+    inferred_types = [
+        _infer_column_type([row[index] for row in typed_rows]) for index in range(width)
+    ]
+    for index, inferred_type in enumerate(inferred_types):
+        if inferred_type == "mixed" and any(
+            isinstance(row[index], str) for row in typed_rows if row[index] is not None
+        ):
+            inferred_types[index] = "string"
+            for row_number, raw_row in enumerate(cleaned_rows):
+                typed_rows[row_number][index] = raw_row[index] or None
     names = _normalized_column_names(cleaned_headers, width)
     columns = tuple(
         TabularColumn(
             index=index + 1,
             name=names[index],
             source_name=cleaned_headers[index] or None,
-            inferred_type=_infer_column_type([row[index] for row in typed_rows]),
+            inferred_type=inferred_types[index],
             nullable=any(row[index] is None for row in typed_rows),
         )
         for index in range(width)
