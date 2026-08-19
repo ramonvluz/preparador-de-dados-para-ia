@@ -4,8 +4,8 @@
 
 - **Produto:** Preparador de Dados para IA da LIMEBH
 - **Tipo de documento:** Documento de Requisitos do Produto (PRD)
-- **Versão:** 0.1
-- **Status:** Planejamento inicial
+- **Versão:** 0.2
+- **Status:** Fases 1 a 4 concluídas; Fase 5 aguardando planejamento
 - **Responsável inicial:** Coordenação de Tecnologia da LIMEBH
 - **Plataforma inicial:** Windows desktop
 
@@ -573,31 +573,37 @@ perder a compatibilidade da CLI.
 
 ## 20. Estado atual validado
 
-O protótipo de MBOX já comprovou:
+Em 19 de agosto de 2026, as Fases 1 a 4 estão implementadas no novo projeto.
+Foram validados:
 
-- leitura incremental de um arquivo com aproximadamente 2,66 GiB;
-- conversão de 3.699 mensagens sem falhas;
-- criação de 15 partes abaixo do limite configurado;
-- limpeza auditável de Unicode;
-- preservação de texto e metadados principais;
-- catálogo de 2.699 anexos sem incorporar binários;
-- criação automática de pastas de conversão;
-- execução local por CLI;
-- testes automatizados do núcleo atual.
+- núcleo modular, contratos versionados, CLI e interface desktop;
+- MBOX real de aproximadamente 2,66 GiB, com 3.699 mensagens sem falhas;
+- progresso, cancelamento seguro, saída automática em Downloads e prevenção de
+  sobrescrita silenciosa;
+- TXT e Markdown particionados;
+- PDF com referências explícitas de página;
+- DOCX com estrutura, tabelas simples e inferências conservadoras;
+- CSV real com 113.036 linhas, dividido em 19 partes sem perdas, falhas ou
+  inconsistências de tipos;
+- XLSX real com aba, intervalo, cabeçalhos e tipos preservados, validado pelo
+  JSON Schema `spreadsheet_workbook@1.0`;
+- 101 testes automatizados aprovados, além de análise estática e compilação.
 
-Lacunas conhecidas do protótipo:
+Limites atuais conhecidos:
 
-- labels do Gmail ainda não fazem parte da saída;
-- `X-GM-THRID`, `In-Reply-To` e `References` não são preservados;
-- conteúdo dos anexos não é extraído;
-- não há progresso visível durante a leitura inicial;
-- existem casos isolados de codificação danificada na origem;
-- interface desktop ainda não existe;
-- esquema atual ainda não usa o envelope versionado deste PRD.
+- a interface seleciona uma fonte por conversão; seleção múltipla permanece
+  planejada;
+- conteúdo binário de anexos não é extraído;
+- OCR e anonimização ainda não foram implementados;
+- `.xls` legado não é aceito;
+- fórmulas XLSX não são executadas e dependem do valor em cache quando existente;
+- planilhas XLSX muito grandes ainda precisam de teste específico de memória;
+- o layout desktop é funcional, mas o refinamento visual final pertence à fase
+  de distribuição.
 
 ## 21. Roadmap
 
-### Fase 1 — Núcleo e contrato de e-mail
+### Fase 1 — Núcleo e contrato de e-mail — concluída
 
 - Refatorar o conversor atual em módulos.
 - Definir JSON Schema do `email_message`.
@@ -607,7 +613,7 @@ Lacunas conhecidas do protótipo:
 - Adaptar a saída para `PRONTO_PARA_IA` e `LEIA-ME.txt`.
 - Manter a CLI funcional.
 
-### Fase 2 — MVP desktop
+### Fase 2 — MVP desktop — concluída
 
 - Implementar interface Tkinter/ttk.
 - Detectar a pasta Downloads do sistema.
@@ -617,20 +623,20 @@ Lacunas conhecidas do protótipo:
 - Mostrar progresso, avisos e resumo.
 - Abrir a pasta de saída.
 
-### Fase 3 — Documentos narrativos
+### Fase 3 — Documentos narrativos — concluída
 
 - Implementar TXT e Markdown.
 - Implementar PDF com referências de página.
 - Implementar DOCX com seções e tabelas simples.
 - Criar contratos e testes correspondentes.
 
-### Fase 4 — Dados tabulares
+### Fase 4 — Dados tabulares — concluída
 
 - Implementar CSV.
 - Implementar XLSX com abas, tipos e tabelas.
 - Gerar JSON ou JSONL conforme perfil.
 
-### Fase 5 — Privacidade e conteúdo avançado
+### Fase 5 — Privacidade e conteúdo avançado — próxima
 
 - Detectar possíveis dados pessoais.
 - Oferecer anonimização opcional.
@@ -719,7 +725,8 @@ Estas decisões serão tomadas durante as fases correspondentes:
 
 ## 27. Próximo incremento
 
-O próximo incremento será a Fase 1: reorganizar o código atual em módulos,
-formalizar o contrato `email_message`, preservar labels e threads, implementar
-progresso/cancelamento e gerar a nova estrutura de saída. Somente depois dessa
-base estabilizada a interface desktop deverá ser conectada ao núcleo.
+O próximo incremento será o planejamento da Fase 5. Antes de codificar, o escopo
+será dividido em entregas pequenas, começando pela detecção auditável de possíveis
+dados pessoais e sua apresentação no relatório. Anonimização, `body_analysis`,
+extração de anexos e OCR serão avaliados separadamente, sempre preservando o
+conteúdo original e o processamento local por padrão.
