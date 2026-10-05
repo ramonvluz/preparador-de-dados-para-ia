@@ -3,7 +3,7 @@
 Aplicação local para converter, limpar, estruturar e particionar arquivos
 administrativos antes do uso em plataformas de IA ou integrações via API.
 
-**Status atual:** MVP funcional; versão portátil Windows gerada e em validação.
+**Status atual:** MVP 0.1.0 concluído e validado no Windows.
 
 Este repositório contém a nova base modular do produto. A base atual implementa
 a conversão incremental de MBOX, o contrato versionado `email_message`, limpeza
@@ -118,8 +118,8 @@ Os artefatos são gravados em `dist/`:
 - `Preparador-de-Dados-para-IA-portatil-0.1.0-windows-x64.zip`: pacote para distribuição;
 - `SHA256SUMS.txt`: hash para verificação do ZIP.
 
-Consulte o [manual rápido](docs/MANUAL_RAPIDO.md). O pacote ainda deve ser testado
-em outro computador Windows sem Python antes de ser tratado como uma versão pública.
+Consulte o [manual rápido](docs/MANUAL_RAPIDO.md). O pacote foi testado com
+sucesso em outro computador Windows, sem depender de Python ou VS Code.
 
 ## Documentação
 

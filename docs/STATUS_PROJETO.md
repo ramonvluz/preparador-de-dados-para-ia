@@ -1,8 +1,8 @@
 # Status do projeto
 
-**Atualizado em:** 19 de agosto de 2026  
-**Versão do aplicativo:** 0.1.0  
-**Situação:** MVP funcional; versão portátil Windows gerada e em validação externa
+**Atualizado em:** 5 de outubro de 2026
+**Versão do aplicativo:** 0.1.0
+**Situação:** MVP 0.1.0 concluído e validado no Windows
 
 ## Entregas concluídas
 
@@ -13,7 +13,7 @@
 | 3 | TXT, Markdown, PDF e DOCX | Concluída |
 | 4 | Contratos tabulares, CSV e XLSX | Concluída |
 | 5 | Privacidade e conteúdo avançado | Adiada |
-| 6 | Empacotamento, identidade visual e distribuição Windows | Em andamento |
+| 6 | Empacotamento, identidade visual e distribuição Windows | Concluída |
 
 ## Validações atuais
 
@@ -25,6 +25,7 @@
 - Qualidade: análise estática e compilação aprovadas.
 - Build portátil `onedir` iniciado com sucesso sem usar o Python do ambiente virtual.
 - ZIP portátil descompactado e iniciado com título, ícone, versão e manual corretos.
+- Versão portátil testada com sucesso em outro computador Windows.
 
 ## Capacidades disponíveis
 
@@ -55,7 +56,6 @@ Esses itens não fazem parte do MVP nem do escopo imediato do produto.
 
 ## Próximo passo recomendado
 
-Copiar o ZIP portátil para outro computador Windows sem Python, iniciar o
-aplicativo e converter uma amostra narrativa, uma tabular e um MBOX. Depois da
-aprovação externa, publicar a versão 0.1.0 portátil e decidir se o instalador
-entra nesta versão ou em uma atualização posterior.
+Publicar o código-fonte como projeto de portfólio e registrar a versão `v0.1.0`.
+O instalador, o refinamento visual adicional e os recursos avançados permanecem
+como evoluções futuras opcionais.
