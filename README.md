@@ -1,52 +1,69 @@
 # Preparador de Dados para IA
 
-Aplicação local para converter, limpar, estruturar e particionar arquivos
-administrativos antes do uso em plataformas de IA ou integrações via API.
+Plataformas de inteligência artificial nem sempre aceitam arquivos como MBOX ou
+documentos muito grandes diretamente. O Preparador de Dados para IA é uma
+aplicação local para extrair, limpar, estruturar e particionar esses conteúdos em
+formatos mais adequados para análise por IA.
+
+O programa oferece interface gráfica e linha de comando, preserva o arquivo
+original e organiza cada conversão em uma pasta própria, com arquivos prontos
+para uso e relatório técnico separado.
+
+**Versão 0.1.0 concluída e validada no Windows.**
 
 [Baixar a versão portátil para Windows](https://github.com/ramonvluz/preparador-de-dados-para-ia/releases/download/v0.1.0/Preparador-de-Dados-para-IA-portatil-0.1.0-windows-x64.zip)
 
 ![Interface principal do Preparador de Dados para IA](docs/assets/interface-principal.png)
 
-**Status atual:** MVP 0.1.0 concluído e validado no Windows.
+## Principais funcionalidades
 
-Este repositório contém a nova base modular do produto. A base atual implementa
-a conversão incremental de MBOX, o contrato versionado `email_message`, limpeza
-Unicode auditável, particionamento por bytes e tokens, saídas JSON/JSONL,
-relatório, cancelamento seguro, CLI e interface desktop.
+- Conversão local por interface gráfica ou CLI.
+- Escolha automática do formato de saída conforme a origem e o destino de uso.
+- Particionamento por tamanho e estimativa de tokens.
+- Saídas compactas em `PRONTO_PARA_IA`, sem repetição desnecessária de metadados.
+- Relatório auditável com informações técnicas, avisos e limitações.
+- Limpeza Unicode conservadora, sem correções semânticas automáticas.
+- Progresso, cancelamento seguro e preservação das partes já concluídas.
+- Perfis para envio manual a plataformas de IA ou integração via API.
 
-Os contratos completos permanecem na camada interna de extração e auditoria.
-Os arquivos de `PRONTO_PARA_IA` usam uma representação compacta: preservam o
-conteúdo e o contexto necessário à análise, sem repetir IDs, timestamps e
-metadados de processamento em cada registro.
+## Formatos suportados
 
-A Fase 3 converte TXT, Markdown, PDF e DOCX para partes Markdown
-autossuficientes. PDFs preservam referências explícitas de página e catalogam
-sumário, anexos e imagens sem copiar seus binários. DOCX preserva a ordem de
-títulos, parágrafos, listas, seções e tabelas simples, registrando os recursos
-avançados que não entram na saída. Quando faltam estilos semânticos, o conversor
-infere de forma conservadora títulos em negrito e cabeçalhos prováveis de tabela.
-Sequências de caracteres suspeitas geram aviso, mas nunca são corrigidas
-automaticamente.
+| Formato de origem | Tratamento principal | Saída recomendada |
+|---|---|---|
+| MBOX | Conversão incremental de mensagens e catálogo de anexos | JSON ou JSONL particionado |
+| TXT | Leitura com detecção de codificação e limpeza conservadora | Markdown particionado |
+| Markdown | Preservação da estrutura textual | Markdown particionado |
+| PDF | Extração de texto com referências de página e catálogo de imagens | Markdown particionado |
+| DOCX | Preservação de títulos, parágrafos, listas e tabelas simples | Markdown particionado |
+| CSV | Detecção de delimitador, cabeçalho, codificação e tipos | JSON ou JSONL particionado |
+| XLSX | Preservação de abas, tabelas, intervalos, tipos e fórmulas | JSON ou JSONL particionado |
 
-A Fase 4 implementa contratos e conversores para CSV e XLSX, com colunas tipadas,
-segmentos de linhas, contexto de abas e intervalos e preservação auditável de
-fórmulas. CSV detecta codificação, delimitador, cabeçalho e tipos. XLSX preserva
-abas, tabelas do Excel, intervalos, visibilidade e fórmulas sem executá-las nem
-seguir vínculos externos. Os arquivos originais não são alterados.
+## Segurança e processamento local
 
-## Princípios de segurança
+- O processamento ocorre no computador do usuário, sem envio automático à internet.
+- O arquivo de origem permanece no local original e não é alterado.
+- Caminhos absolutos da origem não são gravados nos artefatos nem no relatório.
+- Anexos de e-mail são catalogados, mas seus binários não entram nas saídas.
+- Erros de mensagens individuais não registram o conteúdo da mensagem.
+- A saída pode preservar dados pessoais já existentes no arquivo original.
 
-- O processamento é local e não envia dados para a internet.
-- A fonte é lida no local original e não é alterada, movida ou copiada.
-- Anexos são apenas catalogados; seus binários não entram nos JSONs.
-- O caminho absoluto da fonte não é gravado nos artefatos nem no relatório.
-- Erros por mensagem não registram o conteúdo da mensagem.
+## Usar a versão portátil
+
+Baixe o [ZIP portátil da versão 0.1.0](https://github.com/ramonvluz/preparador-de-dados-para-ia/releases/download/v0.1.0/Preparador-de-Dados-para-IA-portatil-0.1.0-windows-x64.zip),
+descompacte todo o conteúdo e execute `Preparador de Dados para IA.exe`.
+
+O pacote não depende de Python ou VS Code. Como o executável ainda não possui
+assinatura digital comercial, o Smart App Control de alguns computadores com
+Windows 11 pode bloquear sua execução. Nesses ambientes, use o código-fonte ou
+uma compilação assinada; não é recomendado desativar proteções do Windows apenas
+para executar o programa.
+
+Consulte o [manual rápido](docs/MANUAL_RAPIDO.md) para conhecer o fluxo da
+interface e a organização dos resultados.
 
 ## Executar a partir do código-fonte
 
 Requisitos: Windows e Python 3.11 ou mais recente.
-
-No PowerShell, a partir da raiz do projeto:
 
 ```powershell
 git clone https://github.com/ramonvluz/preparador-de-dados-para-ia.git
@@ -55,7 +72,7 @@ py -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 python -m pip install -e .
-preparador-dados-gui
+python -m preparador_dados_ia.ui
 ```
 
 Para instalar também as ferramentas de testes e empacotamento:
@@ -64,97 +81,70 @@ Para instalar também as ferramentas de testes e empacotamento:
 python -m pip install -e ".[dev]"
 ```
 
-## Uso da CLI
+## Uso da linha de comando
 
 ```powershell
-.\.venv\Scripts\preparador-dados.exe "C:\caminho\emails.mbox"
+preparador-dados "C:\caminho\arquivo.mbox"
+preparador-dados "C:\caminho\relatorio.pdf"
+preparador-dados "C:\caminho\dados.csv" --profile api
+preparador-dados "C:\caminho\planejamento.xlsx" --output "C:\saida"
 ```
 
-Por padrão, o resultado é criado em `Downloads\Preparador de Dados para IA`, com uma
-pasta exclusiva para a conversão. Para MBOX, o perfil `platform` gera JSON
-particionado e o perfil `api` gera JSONL. TXT e Markdown geram Markdown
-particionado nos dois perfis. PDF gera Markdown com títulos de página e DOCX
-gera Markdown estruturado, conforme a recomendação automática do
-PRD. CSV e XLSX geram JSON tabular no perfil `platform` e JSONL no perfil `api`.
+Use `preparador-dados --help` para consultar todas as opções. Por padrão, os
+resultados são criados em `Downloads\Preparador de Dados para IA`.
 
-```powershell
-.\.venv\Scripts\preparador-dados.exe emails.mbox --profile api
-.\.venv\Scripts\preparador-dados.exe manual.txt
-.\.venv\Scripts\preparador-dados.exe orientacoes.md --profile api
-.\.venv\Scripts\preparador-dados.exe relatorio.pdf
-.\.venv\Scripts\preparador-dados.exe manual.docx
-.\.venv\Scripts\preparador-dados.exe dados.csv --profile api
-.\.venv\Scripts\preparador-dados.exe planejamento.xlsx
-.\.venv\Scripts\preparador-dados.exe emails.mbox --output C:\saida\conversao
-.\.venv\Scripts\preparador-dados.exe emails.mbox --max-size-mb 25 --max-tokens 250000
-```
+## Gerar a versão portátil
 
-Use `--help` para consultar todas as opções. Limites são configuráveis e não
-representam garantias permanentes de plataformas externas.
-
-## Interface desktop
-
-Inicie a aplicação gráfica pelo executável instalado no ambiente virtual:
-
-```powershell
-.\.venv\Scripts\preparador-dados-gui.exe
-```
-
-Também é possível executar diretamente como módulo:
-
-```powershell
-.\.venv\Scripts\python.exe -m preparador_dados_ia.ui
-```
-
-A interface seleciona MBOX, TXT, Markdown, PDF, DOCX, CSV ou XLSX e apresenta a
-saída recomendada para cada combinação de fonte e perfil. Ela utiliza
-`Downloads\Preparador de Dados para IA` por padrão e executa a conversão em uma
-thread separada. O cancelamento
-preserva partes concluídas e válidas.
-
-## Verificação
-
-```powershell
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\validate.ps1
-```
-
-O script executa os testes, a análise estática e a compilação dos módulos. As
-fixtures em `tests/fixtures` são artificiais e usam domínios reservados.
-
-## Versão portátil Windows
-
-Usuários que não possuem Python podem baixar o
-[ZIP portátil da versão 0.1.0](https://github.com/ramonvluz/preparador-de-dados-para-ia/releases/download/v0.1.0/Preparador-de-Dados-para-IA-portatil-0.1.0-windows-x64.zip),
-descompactar todo o conteúdo e executar `Preparador de Dados para IA.exe`.
-
-O build utiliza PyInstaller em modo `onedir`, sem janela de terminal. Para gerar
-o executável, o ZIP portátil e o arquivo de verificação SHA-256:
+Com as dependências de desenvolvimento instaladas:
 
 ```powershell
 .\scripts\build_portable.ps1
 ```
 
-Os artefatos são gravados em `dist/`:
+O build utiliza PyInstaller em modo `onedir` e grava em `dist/` a pasta
+executável, o ZIP portátil e o arquivo `SHA256SUMS.txt`.
 
-- `Preparador de Dados para IA/`: pasta executável completa;
-- `Preparador-de-Dados-para-IA-portatil-0.1.0-windows-x64.zip`: pacote para distribuição;
-- `SHA256SUMS.txt`: hash para verificação do ZIP.
+## Validação
 
-Consulte o [manual rápido](docs/MANUAL_RAPIDO.md). O pacote foi testado com
-sucesso em outro computador Windows, sem depender de Python ou VS Code.
+- 105 testes automatizados aprovados.
+- Análise estática, formatação e compilação dos módulos verificadas.
+- MBOX real de aproximadamente 2,66 GiB e 3.699 mensagens convertido sem falhas.
+- CSV real de 113.036 linhas e XLSX real validados sem perda de registros.
+- Pacote portátil testado em outro computador Windows sem Python.
 
-## Documentação
+Para executar a validação local:
 
-- [Status atual do projeto](docs/STATUS_PROJETO.md)
+```powershell
+.\scripts\validate.ps1
+```
+
+As fixtures incluídas no repositório são artificiais e usam domínios reservados.
+
+## Limitações conhecidas
+
+- A interface processa uma fonte por conversão.
+- PDFs digitalizados não possuem OCR nesta versão.
+- O conteúdo de anexos de e-mail não é extraído.
+- Arquivos `.xls` antigos não são suportados; utilize `.xlsx`.
+- Fórmulas de planilhas são preservadas, mas não executadas.
+- Detecção e anonimização de dados pessoais não fazem parte desta versão.
+
+## Documentação técnica
+
 - [Arquitetura](docs/ARQUITETURA.md)
-- [PRD](docs/PRD.md)
-- [Manual rápido da versão portátil](docs/MANUAL_RAPIDO.md)
+- [Documento de requisitos](docs/PRD.md)
+- [Status do projeto](docs/STATUS_PROJETO.md)
+- [Manual rápido](docs/MANUAL_RAPIDO.md)
 - [Validação de equivalência](docs/VALIDACAO_EQUIVALENCIA.md)
-- [Validação da Fase 2 — MVP desktop](docs/VALIDACAO_FASE_2.md)
-- [Validação da Fase 3A — contratos e arquitetura](docs/VALIDACAO_FASE_3A.md)
-- [Validação da Fase 3B — TXT e Markdown](docs/VALIDACAO_FASE_3B.md)
-- [Validação da Fase 3C — PDF](docs/VALIDACAO_FASE_3C.md)
-- [Validação da Fase 3D — DOCX](docs/VALIDACAO_FASE_3D.md)
-- [Validação da Fase 4A — contratos e arquitetura tabular](docs/VALIDACAO_FASE_4A.md)
-- [Validação da Fase 4B — CSV](docs/VALIDACAO_FASE_4B.md)
-- [Validação da Fase 4C — XLSX](docs/VALIDACAO_FASE_4C.md)
+- [Validação da interface desktop](docs/VALIDACAO_FASE_2.md)
+- [Contratos e arquitetura](docs/VALIDACAO_FASE_3A.md)
+- [Conversão de TXT e Markdown](docs/VALIDACAO_FASE_3B.md)
+- [Conversão de PDF](docs/VALIDACAO_FASE_3C.md)
+- [Conversão de DOCX](docs/VALIDACAO_FASE_3D.md)
+- [Contratos tabulares](docs/VALIDACAO_FASE_4A.md)
+- [Conversão de CSV](docs/VALIDACAO_FASE_4B.md)
+- [Conversão de XLSX](docs/VALIDACAO_FASE_4C.md)
+
+## Licença
+
+Distribuído sob a [Licença MIT](LICENSE).
