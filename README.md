@@ -3,6 +3,10 @@
 Aplicação local para converter, limpar, estruturar e particionar arquivos
 administrativos antes do uso em plataformas de IA ou integrações via API.
 
+[Baixar a versão portátil para Windows](https://github.com/ramonvluz/preparador-de-dados-para-ia/releases/download/v0.1.0/Preparador-de-Dados-para-IA-portatil-0.1.0-windows-x64.zip)
+
+![Interface principal do Preparador de Dados para IA](docs/assets/interface-principal.png)
+
 **Status atual:** MVP 0.1.0 concluído e validado no Windows.
 
 Este repositório contém a nova base modular do produto. A base atual implementa
@@ -38,12 +42,26 @@ seguir vínculos externos. Os arquivos originais não são alterados.
 - O caminho absoluto da fonte não é gravado nos artefatos nem no relatório.
 - Erros por mensagem não registram o conteúdo da mensagem.
 
-## Preparação do ambiente
+## Executar a partir do código-fonte
+
+Requisitos: Windows e Python 3.11 ou mais recente.
 
 No PowerShell, a partir da raiz do projeto:
 
 ```powershell
-.\.venv\Scripts\python.exe -m pip install -e ".[dev]"
+git clone https://github.com/ramonvluz/preparador-de-dados-para-ia.git
+cd preparador-de-dados-para-ia
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -e .
+preparador-dados-gui
+```
+
+Para instalar também as ferramentas de testes e empacotamento:
+
+```powershell
+python -m pip install -e ".[dev]"
 ```
 
 ## Uso da CLI
@@ -104,6 +122,10 @@ O script executa os testes, a análise estática e a compilação dos módulos. 
 fixtures em `tests/fixtures` são artificiais e usam domínios reservados.
 
 ## Versão portátil Windows
+
+Usuários que não possuem Python podem baixar o
+[ZIP portátil da versão 0.1.0](https://github.com/ramonvluz/preparador-de-dados-para-ia/releases/download/v0.1.0/Preparador-de-Dados-para-IA-portatil-0.1.0-windows-x64.zip),
+descompactar todo o conteúdo e executar `Preparador de Dados para IA.exe`.
 
 O build utiliza PyInstaller em modo `onedir`, sem janela de terminal. Para gerar
 o executável, o ZIP portátil e o arquivo de verificação SHA-256:
